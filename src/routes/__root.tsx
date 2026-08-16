@@ -77,7 +77,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "ডিজিটাল আদর্শ বিদ্যালয়" },
+      { title: "Digital School" },
       { name: "description", content: "আধুনিক শিক্ষা ও ডিজিটাল সেবার প্ল্যাটফর্ম।" },
       { property: "og:title", content: "ডিজিটাল আদর্শ বিদ্যালয়" },
       { property: "og:description", content: "আধুনিক শিক্ষা ও ডিজিটাল সেবার প্ল্যাটফর্ম।" },
