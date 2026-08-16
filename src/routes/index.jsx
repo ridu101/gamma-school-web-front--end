@@ -15,7 +15,7 @@ import Footer from "@/components/Footer";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "ডিজিটাল বিদ্যালয় | আধুনিক শিক্ষা ও ডিজিটাল সেবা প্ল্যাটফর্ম" },
+      { title: "ডিজিটাল বিদ্যালয় " },
       {
         name: "description",
         content:

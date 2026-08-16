@@ -35,7 +35,7 @@ export default function HeroCarousel() {
         <div
           key={slide.title}
           className={cn(
-            "absolute inset-0 transition-opacity duration-700",
+            "absolute inset-0 transition-opacity duration-200",
             i === index ? "opacity-100" : "opacity-0",
           )}
           aria-hidden={i !== index}
@@ -47,17 +47,17 @@ export default function HeroCarousel() {
             height={1000}
             loading={i === 0 ? "eager" : "lazy"}
             className={cn(
-              "h-full w-full object-cover transition-transform duration-[6000ms] ease-out",
+              "h-full w-full object-cover transition-transform duration-6000 ease-out",
               i === index ? "scale-105" : "scale-100",
             )}
           />
-          <div className="absolute inset-0 bg-[image:var(--gradient-hero)] opacity-95" />
+          <div className="absolute inset-0 bg-(image:--gradient-hero) opacity-95" />
           <div className="absolute inset-0 bg-navy-deep/45" />
         </div>
       ))}
 
       <div className="pointer-events-none absolute inset-0 grid-pattern opacity-[0.18]" />
-      <div className="pointer-events-none absolute -top-24 -right-24 h-96 w-96 rounded-full bg-[image:var(--gradient-accent)] opacity-25 blur-3xl float-slow" />
+      <div className="pointer-events-none absolute -top-24 -right-24 h-96 w-96 rounded-full bg-(image:--gradient-accent) opacity-25 blur-3xl float-slow" />
 
       <div className="container-x relative z-10 flex min-h-[62vh] items-center">
         <div className="max-w-3xl">
@@ -83,7 +83,7 @@ export default function HeroCarousel() {
                 <button
                   type="button"
                   onClick={scrollTo(slide.target)}
-                  className="inline-flex items-center gap-2 rounded-full bg-[image:var(--gradient-accent)] px-6 py-3 text-sm font-semibold text-primary-foreground shadow-[var(--shadow-glow)] transition-transform duration-300 hover:-translate-y-0.5"
+                  className="inline-flex items-center gap-2 rounded-full bg-(image:--gradient-accent) px-6 py-3 text-sm font-semibold text-primary-foreground shadow-(--shadow-glow) transition-transform duration-300 hover:-translate-y-0.5"
                 >
                   {slide.cta}
                   <Icon name="arrowRight" className="h-4 w-4" />
@@ -128,7 +128,7 @@ export default function HeroCarousel() {
               onClick={() => setIndex(i)}
               className={cn(
                 "h-1.5 rounded-full transition-all duration-500",
-                i === index ? "w-10 bg-[image:var(--gradient-accent)]" : "w-4 bg-cyan-soft/35",
+                i === index ? "w-10 bg-(image:--gradient-accent)" : "w-4 bg-cyan-soft/35",
               )}
             />
           ))}

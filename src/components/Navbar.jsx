@@ -21,7 +21,20 @@ export default function Navbar() {
   const go = (id) => (event) => {
     event.preventDefault();
     setOpen(false);
-    document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
+
+    const element = document.getElementById(id);
+
+    if (!element) return;
+
+    const navbarHeight = 80;
+    const elementPosition = element.getBoundingClientRect().top + window.scrollY;
+
+    const targetPosition = elementPosition - navbarHeight;
+
+    window.scrollTo({
+      top: Math.max(0, targetPosition),
+      behavior: "smooth",
+    });
   };
 
   return (

@@ -7,7 +7,7 @@ import SectionHeading from "./SectionHeading";
 
 export default function AboutSchool() {
   return (
-    <section id="about" className="section-y scroll-mt-24">
+    <section id="about" className="section-y ">
       <div className="container-x">
         <SectionHeading
           eyebrow="বিদ্যালয় পরিচিতি"
@@ -18,14 +18,14 @@ export default function AboutSchool() {
         <div className="mt-12 grid items-start gap-8 lg:mt-16 lg:grid-cols-2 lg:gap-12">
           <Reveal>
             <div className="relative">
-              <div className="pointer-events-none absolute -top-6 -left-6 h-40 w-40 rounded-full bg-[image:var(--gradient-accent)] opacity-15 blur-3xl" />
+              <div className="pointer-events-none absolute -top-6 -left-6 h-40 w-40 rounded-full bg-(image:--gradient-accent) opacity-15 blur-3xl" />
               <img
                 src={images.about}
                 alt="বিদ্যালয় প্রাঙ্গণ"
                 width={1200}
                 height={900}
                 loading="lazy"
-                className="relative w-full rounded-3xl border border-border object-cover shadow-[var(--shadow-lift)]"
+                className="relative w-full rounded-3xl border border-border object-cover shadow-(--shadow-lift)"
               />
               <div className="glass-card absolute -bottom-6 left-4 rounded-2xl px-5 py-4 sm:left-8">
                 <p className="text-xl font-bold text-gradient">৪০ বছরের</p>
