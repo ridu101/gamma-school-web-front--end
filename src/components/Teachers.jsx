@@ -1,5 +1,5 @@
-import { useMemo, useState } from "react";
-import { departments, teachers } from "@/data/teachers";
+import { useEffect, useMemo, useState } from "react";
+import { departments as defaultDepartments } from "@/data/teachers";
 import { cn } from "@/lib/utils";
 import Icon from "./Icon";
 import Reveal from "./Reveal";
@@ -10,15 +10,73 @@ export default function Teachers() {
   const [department, setDepartment] = useState("সব");
   const [query, setQuery] = useState("");
 
+  const [teachers, setTeachers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  // Get teachers from Laravel API
+  useEffect(() => {
+    const fetchTeachers = async () => {
+      try {
+        setLoading(true);
+        setError("");
+
+        const response = await fetch(
+          "http://127.0.0.1:8000/api/teachers"
+        );
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch teachers");
+        }
+
+        const result = await response.json();
+
+        // Laravel response:
+        // {
+        //   success: true,
+        //   data: [...]
+        // }
+
+        setTeachers(result.data || []);
+      } catch (error) {
+        console.error("Teacher API Error:", error);
+        setError("শিক্ষকদের তথ্য লোড করা যায়নি।");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTeachers();
+  }, []);
+
+  // Get unique departments from API data
+  const departments = useMemo(() => {
+    const apiDepartments = teachers
+      .map((teacher) => teacher.department)
+      .filter(Boolean);
+
+    const uniqueDepartments = [...new Set(apiDepartments)];
+
+    return ["সব", ...uniqueDepartments];
+  }, [teachers]);
+
   const filtered = useMemo(() => {
-    const q = query.trim();
+    const q = query.trim().toLowerCase();
+
     return teachers.filter((teacher) => {
-      const matchDept = department === "সব" || teacher.department === department;
+      const matchDept =
+        department === "সব" || teacher.department === department;
+
       const matchQuery =
-        !q || teacher.name.includes(q) || teacher.subject.includes(q) || teacher.designation.includes(q);
+        !q ||
+        teacher.name?.toLowerCase().includes(q) ||
+        teacher.designation?.toLowerCase().includes(q) ||
+        teacher.department?.toLowerCase().includes(q) ||
+        teacher.bio?.toLowerCase().includes(q);
+
       return matchDept && matchQuery;
     });
-  }, [department, query]);
+  }, [teachers, department, query]);
 
   return (
     <section id="teachers" className="section-y scroll-mt-24">
@@ -31,7 +89,11 @@ export default function Teachers() {
 
         <Reveal className="mt-10 grid gap-4 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
           <div className="flex items-center gap-3 rounded-2xl border border-border bg-surface px-4 py-3">
-            <Icon name="search" className="h-5 w-5 shrink-0 text-teal" />
+            <Icon
+              name="search"
+              className="h-5 w-5 shrink-0 text-teal"
+            />
+
             <input
               type="text"
               value={query}
@@ -41,6 +103,7 @@ export default function Teachers() {
               className="w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground"
             />
           </div>
+
           <div className="flex flex-wrap gap-2">
             {departments.map((dept) => (
               <button
@@ -51,7 +114,7 @@ export default function Teachers() {
                   "rounded-full border px-4 py-2 text-xs font-semibold transition-all duration-300",
                   department === dept
                     ? "border-transparent bg-[image:var(--gradient-accent)] text-primary-foreground shadow-[var(--shadow-glow)]"
-                    : "border-border bg-surface text-foreground/75 hover:border-accent/50 hover:text-teal",
+                    : "border-border bg-surface text-foreground/75 hover:border-accent/50 hover:text-teal"
                 )}
               >
                 {dept}
@@ -60,15 +123,36 @@ export default function Teachers() {
           </div>
         </Reveal>
 
-        {filtered.length ? (
+        {/* Loading */}
+        {loading && (
+          <div className="mt-12 py-12 text-center text-sm text-muted-foreground">
+            শিক্ষকদের তথ্য লোড হচ্ছে...
+          </div>
+        )}
+
+        {/* Error */}
+        {!loading && error && (
+          <div className="mt-12 rounded-2xl border border-dashed border-border py-12 text-center text-sm text-red-500">
+            {error}
+          </div>
+        )}
+
+        {/* Teachers */}
+        {!loading && !error && filtered.length ? (
           <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {filtered.map((teacher, i) => (
-              <Reveal key={teacher.id} delay={(i % 3) * 90}>
+              <Reveal
+                key={teacher.id}
+                delay={(i % 3) * 90}
+              >
                 <TeacherCard teacher={teacher} />
               </Reveal>
             ))}
           </div>
-        ) : (
+        ) : null}
+
+        {/* No teachers found */}
+        {!loading && !error && !filtered.length && (
           <p className="mt-12 rounded-2xl border border-dashed border-border py-12 text-center text-sm text-muted-foreground">
             এই অনুসন্ধানে কোনো শিক্ষক পাওয়া যায়নি।
           </p>
