@@ -12,11 +12,44 @@ export const Route = createFileRoute("/admin/dashboard")({
   component: AdminDashboard,
 });
 
+// English number → Bangla number
+const toBanglaNumber = (number) => {
+  const banglaDigits = [
+    "০",
+    "১",
+    "২",
+    "৩",
+    "৪",
+    "৫",
+    "৬",
+    "৭",
+    "৮",
+    "৯",
+  ];
+
+  return String(number).replace(
+    /\d/g,
+    (digit) => banglaDigits[digit]
+  );
+};
+
 function AdminDashboard() {
   const navigate = useNavigate();
 
   const [admin, setAdmin] = useState(null);
+
   const [loading, setLoading] = useState(true);
+
+  const [stats, setStats] = useState({
+    teachers: 0,
+    students: 0,
+    results: 0,
+    routines: 0,
+  });
+
+  // ==========================================
+  // CHECK AUTH + LOAD DASHBOARD STATS
+  // ==========================================
 
   useEffect(() => {
     async function checkAuth() {
@@ -33,10 +66,36 @@ function AdminDashboard() {
       }
 
       try {
+        // Admin Information
         const response =
           await apiRequest("/auth/me");
 
         setAdmin(response.data);
+
+        // Dashboard Stats
+        try {
+          const statsResponse =
+            await apiRequest("/dashboard/stats");
+
+          setStats({
+            teachers:
+              statsResponse.data?.teachers ?? 0,
+
+            students:
+              statsResponse.data?.students ?? 0,
+
+            results:
+              statsResponse.data?.results ?? 0,
+
+            routines:
+              statsResponse.data?.routines ?? 0,
+          });
+        } catch (statsError) {
+          console.error(
+            "Dashboard stats error:",
+            statsError
+          );
+        }
       } catch (error) {
         console.error("Auth error:", error);
 
@@ -59,6 +118,10 @@ function AdminDashboard() {
 
     checkAuth();
   }, [navigate]);
+
+  // ==========================================
+  // LOGOUT
+  // ==========================================
 
   const handleLogout = async () => {
     try {
@@ -83,6 +146,10 @@ function AdminDashboard() {
     }
   };
 
+  // ==========================================
+  // LOADING
+  // ==========================================
+
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-slate-100">
@@ -95,15 +162,15 @@ function AdminDashboard() {
 
   return (
     <div className="min-h-screen bg-slate-100">
-      {/* ==========================
+      {/* ==========================================
           HEADER
-      ========================== */}
+      ========================================== */}
 
       <header className="border-b bg-white">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-5">
           <div>
             <p className="text-sm text-slate-500">
-              Admin Panel
+              অ্যাডমিন প্যানেল
             </p>
 
             <h1 className="text-xl font-bold text-slate-900">
@@ -133,9 +200,9 @@ function AdminDashboard() {
         </div>
       </header>
 
-      {/* ==========================
+      {/* ==========================================
           CONTENT
-      ========================== */}
+      ========================================== */}
 
       <main className="mx-auto max-w-7xl px-4 py-10">
         {/* Welcome */}
@@ -150,9 +217,9 @@ function AdminDashboard() {
           </p>
         </div>
 
-        {/* ==========================
+        {/* ==========================================
             STATS
-        ========================== */}
+        ========================================== */}
 
         <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
           {/* Teacher */}
@@ -163,7 +230,7 @@ function AdminDashboard() {
             </p>
 
             <h3 className="mt-2 text-3xl font-bold text-blue-600">
-              —
+              {toBanglaNumber(stats.teachers)}
             </h3>
           </div>
 
@@ -175,7 +242,7 @@ function AdminDashboard() {
             </p>
 
             <h3 className="mt-2 text-3xl font-bold text-emerald-600">
-              —
+              {toBanglaNumber(stats.students)}
             </h3>
           </div>
 
@@ -187,7 +254,7 @@ function AdminDashboard() {
             </p>
 
             <h3 className="mt-2 text-3xl font-bold text-violet-600">
-              —
+              {toBanglaNumber(stats.results)}
             </h3>
           </div>
 
@@ -199,14 +266,14 @@ function AdminDashboard() {
             </p>
 
             <h3 className="mt-2 text-3xl font-bold text-orange-600">
-              —
+              {toBanglaNumber(stats.routines)}
             </h3>
           </div>
         </div>
 
-        {/* ==========================
+        {/* ==========================================
             MANAGEMENT
-        ========================== */}
+        ========================================== */}
 
         <div className="mt-10 grid gap-6 md:grid-cols-2 lg:grid-cols-4">
           {/* Teacher Management */}
@@ -217,7 +284,7 @@ function AdminDashboard() {
             </h3>
 
             <p className="mt-2 text-sm leading-6 text-slate-500">
-              শিক্ষক যোগ, edit এবং delete করুন।
+              শিক্ষক যোগ, সম্পাদনা এবং মুছে ফেলুন।
             </p>
 
             <Link
@@ -236,7 +303,7 @@ function AdminDashboard() {
             </h3>
 
             <p className="mt-2 text-sm leading-6 text-slate-500">
-              শিক্ষার্থী যোগ, edit এবং delete করুন।
+              শিক্ষার্থী যোগ, সম্পাদনা এবং মুছে ফেলুন।
             </p>
 
             <Link
@@ -255,7 +322,7 @@ function AdminDashboard() {
             </h3>
 
             <p className="mt-2 text-sm leading-6 text-slate-500">
-              শিক্ষার্থীদের ফলাফল যোগ, edit এবং delete করুন।
+              শিক্ষার্থীদের ফলাফল যোগ, সম্পাদনা এবং মুছে ফেলুন।
             </p>
 
             <Link
@@ -274,7 +341,7 @@ function AdminDashboard() {
             </h3>
 
             <p className="mt-2 text-sm leading-6 text-slate-500">
-              শ্রেণির রুটিন যোগ, edit এবং delete করুন।
+              শ্রেণির রুটিন যোগ, সম্পাদনা এবং মুছে ফেলুন।
             </p>
 
             <Link
