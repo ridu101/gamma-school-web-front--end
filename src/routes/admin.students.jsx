@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
+
 import {
   createFileRoute,
   Link,
   useNavigate,
 } from "@tanstack/react-router";
 
+import toast from "react-hot-toast";
 import { apiRequest } from "../services/api";
 
 export const Route = createFileRoute("/admin/students")({
@@ -37,15 +39,14 @@ function AdminStudents() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
+  // ==========================================
+  // AUTH + LOAD STUDENTS
+  // ==========================================
 
-  // =========================
-  // Auth + Load Students
-  // =========================
   useEffect(() => {
     async function initializePage() {
-      const token = window.localStorage.getItem("admin_token");
+      const token =
+        window.localStorage.getItem("admin_token");
 
       if (!token) {
         navigate({
@@ -61,14 +62,27 @@ function AdminStudents() {
         await apiRequest("/auth/me");
 
         // Get Students
-        const response = await apiRequest("/students");
+        const response =
+          await apiRequest("/students");
 
         setStudents(response.data || []);
       } catch (error) {
-        console.error("Student page error:", error);
+        console.error(
+          "Student page error:",
+          error
+        );
 
-        window.localStorage.removeItem("admin_token");
-        window.localStorage.removeItem("admin_user");
+        window.localStorage.removeItem(
+          "admin_token"
+        );
+
+        window.localStorage.removeItem(
+          "admin_user"
+        );
+
+        toast.error(
+          "আপনার সেশন শেষ হয়েছে। আবার লগইন করুন।"
+        );
 
         navigate({
           to: "/admin/login",
@@ -82,116 +96,235 @@ function AdminStudents() {
     initializePage();
   }, [navigate]);
 
-  // =========================
-  // Reload Students
-  // =========================
+  // ==========================================
+  // RELOAD STUDENTS
+  // ==========================================
+
   const loadStudents = async () => {
     try {
-      const response = await apiRequest("/students");
+      const response =
+        await apiRequest("/students");
 
       setStudents(response.data || []);
     } catch (error) {
       console.error(error);
-      setError(error.message);
+
+      toast.error(
+        error.message ||
+          "শিক্ষার্থীদের তথ্য লোড করা যায়নি।"
+      );
     }
   };
 
-  // =========================
-  // Input Change
-  // =========================
+  // ==========================================
+  // INPUT CHANGE
+  // ==========================================
+
   const handleChange = (event) => {
-    const { name, value, type, checked } = event.target;
+    const {
+      name,
+      value,
+      type,
+      checked,
+    } = event.target;
 
     setForm((previous) => ({
       ...previous,
-      [name]: type === "checkbox" ? checked : value,
+
+      [name]:
+        type === "checkbox"
+          ? checked
+          : value,
     }));
   };
 
-  // =========================
-  // Add / Update Student
-  // =========================
+  // ==========================================
+  // RESET FORM
+  // ==========================================
+
+  const resetForm = () => {
+    setForm(emptyForm);
+    setEditingId(null);
+  };
+
+  // ==========================================
+  // ADD / UPDATE STUDENT
+  // ==========================================
+
   const handleSubmit = async (event) => {
     event.preventDefault();
 
+    const toastId = toast.loading(
+      editingId
+        ? "শিক্ষার্থীর তথ্য আপডেট করা হচ্ছে..."
+        : "নতুন শিক্ষার্থী যোগ করা হচ্ছে..."
+    );
+
     try {
       setSaving(true);
-      setError("");
-      setSuccess("");
 
       const studentData = {
-        student_id: form.student_id,
-        name: form.name,
-        email: form.email || null,
-        phone: form.phone || null,
-        father_name: form.father_name || null,
-        mother_name: form.mother_name || null,
-        class: form.class,
-        section: form.section || null,
-        roll: form.roll,
-        date_of_birth: form.date_of_birth || null,
-        address: form.address || null,
+        student_id:
+          form.student_id,
+
+        name:
+          form.name,
+
+        email:
+          form.email || null,
+
+        phone:
+          form.phone || null,
+
+        father_name:
+          form.father_name || null,
+
+        mother_name:
+          form.mother_name || null,
+
+        class:
+          form.class,
+
+        section:
+          form.section || null,
+
+        roll:
+          form.roll,
+
+        date_of_birth:
+          form.date_of_birth || null,
+
+        address:
+          form.address || null,
+
         photo: null,
-        status: form.status,
+
+        status:
+          form.status,
       };
 
+      // ======================================
+      // UPDATE STUDENT
+      // ======================================
+
       if (editingId) {
-        await apiRequest(`/students/${editingId}`, {
-          method: "PUT",
-          body: JSON.stringify(studentData),
-        });
-
-        setSuccess(
-          "শিক্ষার্থীর তথ্য সফলভাবে আপডেট হয়েছে।"
+        await apiRequest(
+          `/students/${editingId}`,
+          {
+            method: "PUT",
+            body: JSON.stringify(
+              studentData
+            ),
+          }
         );
-      } else {
-        await apiRequest("/students", {
-          method: "POST",
-          body: JSON.stringify(studentData),
-        });
 
-        setSuccess(
-          "নতুন শিক্ষার্থী সফলভাবে যোগ হয়েছে।"
+        toast.success(
+          "শিক্ষার্থীর তথ্য সফলভাবে আপডেট হয়েছে।",
+          {
+            id: toastId,
+          }
         );
       }
 
-      setForm(emptyForm);
-      setEditingId(null);
+      // ======================================
+      // ADD STUDENT
+      // ======================================
+
+      else {
+        await apiRequest(
+          "/students",
+          {
+            method: "POST",
+            body: JSON.stringify(
+              studentData
+            ),
+          }
+        );
+
+        toast.success(
+          "নতুন শিক্ষার্থী সফলভাবে যোগ হয়েছে।",
+          {
+            id: toastId,
+          }
+        );
+      }
+
+      resetForm();
 
       await loadStudents();
     } catch (error) {
-      console.error("Student save error:", error);
-      setError(error.message);
+      console.error(
+        "Student save error:",
+        error
+      );
+
+      toast.error(
+        error.message ||
+          "শিক্ষার্থীর তথ্য সংরক্ষণ করা যায়নি।",
+        {
+          id: toastId,
+        }
+      );
     } finally {
       setSaving(false);
     }
   };
 
-  // =========================
-  // Edit Student
-  // =========================
+  // ==========================================
+  // EDIT STUDENT
+  // ==========================================
+
   const handleEdit = (student) => {
     setEditingId(student.id);
 
     setForm({
-      student_id: student.student_id || "",
-      name: student.name || "",
-      email: student.email || "",
-      phone: student.phone || "",
-      father_name: student.father_name || "",
-      mother_name: student.mother_name || "",
-      class: student.class || "",
-      section: student.section || "",
-      roll: student.roll || "",
-      date_of_birth: student.date_of_birth
-        ? String(student.date_of_birth).slice(0, 10)
-        : "",
-      address: student.address || "",
-      status: Boolean(student.status),
+      student_id:
+        student.student_id || "",
+
+      name:
+        student.name || "",
+
+      email:
+        student.email || "",
+
+      phone:
+        student.phone || "",
+
+      father_name:
+        student.father_name || "",
+
+      mother_name:
+        student.mother_name || "",
+
+      class:
+        student.class || "",
+
+      section:
+        student.section || "",
+
+      roll:
+        student.roll || "",
+
+      date_of_birth:
+        student.date_of_birth
+          ? String(
+              student.date_of_birth
+            ).slice(0, 10)
+          : "",
+
+      address:
+        student.address || "",
+
+      status:
+        Boolean(student.status),
     });
 
-    setError("");
-    setSuccess("");
+    toast(
+      "শিক্ষার্থীর তথ্য Edit Mode-এ খোলা হয়েছে।",
+      {
+        icon: "✏️",
+      }
+    );
 
     window.scrollTo({
       top: 0,
@@ -199,55 +332,129 @@ function AdminStudents() {
     });
   };
 
-  // =========================
-  // Cancel Edit
-  // =========================
+  // ==========================================
+  // CANCEL EDIT
+  // ==========================================
+
   const handleCancelEdit = () => {
-    setEditingId(null);
-    setForm(emptyForm);
-    setError("");
-    setSuccess("");
+    resetForm();
+
+    toast(
+      "Edit বাতিল করা হয়েছে।",
+      {
+        icon: "↩️",
+      }
+    );
   };
 
-  // =========================
-  // Delete Student
-  // =========================
-  const handleDelete = async (student) => {
-    const confirmed = window.confirm(
-      `${student.name} কে delete করতে চান?`
-    );
+  // ==========================================
+  // DELETE STUDENT
+  // ==========================================
 
-    if (!confirmed) {
-      return;
-    }
-
-    try {
-      setError("");
-      setSuccess("");
-
-      await apiRequest(`/students/${student.id}`, {
-        method: "DELETE",
-      });
-
-      setSuccess(
-        "শিক্ষার্থী সফলভাবে delete হয়েছে।"
+  const deleteStudent = async (
+    student
+  ) => {
+    const toastId =
+      toast.loading(
+        "শিক্ষার্থী মুছে ফেলা হচ্ছে..."
       );
 
-      if (editingId === student.id) {
-        setEditingId(null);
-        setForm(emptyForm);
+    try {
+      await apiRequest(
+        `/students/${student.id}`,
+        {
+          method: "DELETE",
+        }
+      );
+
+      if (
+        editingId ===
+        student.id
+      ) {
+        resetForm();
       }
 
       await loadStudents();
+
+      toast.success(
+        "শিক্ষার্থী সফলভাবে মুছে ফেলা হয়েছে।",
+        {
+          id: toastId,
+        }
+      );
     } catch (error) {
-      console.error("Student delete error:", error);
-      setError(error.message);
+      console.error(
+        "Student delete error:",
+        error
+      );
+
+      toast.error(
+        error.message ||
+          "শিক্ষার্থী মুছে ফেলা যায়নি।",
+        {
+          id: toastId,
+        }
+      );
     }
   };
 
-  // =========================
-  // Loading
-  // =========================
+  // ==========================================
+  // DELETE CONFIRMATION TOAST
+  // ==========================================
+
+  const handleDelete = (
+    student
+  ) => {
+    toast(
+      (t) => (
+        <div className="min-w-[260px]">
+          <p className="font-bold text-white">
+            শিক্ষার্থী মুছে ফেলবেন?
+          </p>
+
+          <p className="mt-1 text-xs leading-5 text-slate-300">
+            {student.name} এর তথ্য
+            স্থায়ীভাবে মুছে যাবে।
+          </p>
+
+          <div className="mt-4 flex justify-end gap-2">
+            <button
+              type="button"
+              onClick={() =>
+                toast.dismiss(t.id)
+              }
+              className="rounded-lg bg-slate-700 px-3 py-2 text-xs font-semibold text-white transition hover:bg-slate-600"
+            >
+              বাতিল
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                toast.dismiss(t.id);
+
+                deleteStudent(
+                  student
+                );
+              }}
+              className="rounded-lg bg-red-500 px-3 py-2 text-xs font-semibold text-white transition hover:bg-red-600"
+            >
+              মুছে ফেলুন
+            </button>
+          </div>
+        </div>
+      ),
+      {
+        duration: Infinity,
+        icon: "⚠️",
+      }
+    );
+  };
+
+  // ==========================================
+  // LOADING
+  // ==========================================
+
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-slate-100">
@@ -260,7 +467,10 @@ function AdminStudents() {
 
   return (
     <div className="min-h-screen bg-slate-100">
-      {/* Header */}
+      {/* ==========================================
+          HEADER
+      ========================================== */}
+
       <header className="border-b bg-white">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-5">
           <div>
@@ -282,35 +492,29 @@ function AdminStudents() {
         </div>
       </header>
 
+      {/* ==========================================
+          CONTENT
+      ========================================== */}
+
       <main className="mx-auto max-w-7xl px-4 py-8">
         {/* Heading */}
+
         <div>
           <h2 className="text-3xl font-bold text-slate-900">
             শিক্ষার্থী পরিচালনা
           </h2>
 
           <p className="mt-2 text-sm text-slate-500">
-            এখান থেকে শিক্ষার্থী যোগ, Edit এবং Delete করতে পারবেন।
+            এখান থেকে শিক্ষার্থী যোগ,
+            সম্পাদনা এবং মুছে ফেলতে
+            পারবেন।
           </p>
         </div>
 
-        {/* Error */}
-        {error && (
-          <div className="mt-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
-            {error}
-          </div>
-        )}
+        {/* ==========================================
+            STUDENT FORM
+        ========================================== */}
 
-        {/* Success */}
-        {success && (
-          <div className="mt-6 rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700">
-            {success}
-          </div>
-        )}
-
-        {/* =========================
-            Student Form
-        ========================== */}
         <section className="mt-8 rounded-2xl bg-white p-6 shadow-sm">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <h3 className="text-xl font-bold text-slate-900">
@@ -322,7 +526,9 @@ function AdminStudents() {
             {editingId && (
               <button
                 type="button"
-                onClick={handleCancelEdit}
+                onClick={
+                  handleCancelEdit
+                }
                 className="text-sm font-semibold text-red-500"
               >
                 Cancel Edit
@@ -331,10 +537,13 @@ function AdminStudents() {
           </div>
 
           <form
-            onSubmit={handleSubmit}
+            onSubmit={
+              handleSubmit
+            }
             className="mt-6 grid gap-5 md:grid-cols-2 lg:grid-cols-3"
           >
             {/* Student ID */}
+
             <div>
               <label className="mb-2 block text-sm font-semibold text-slate-700">
                 Student ID *
@@ -343,8 +552,12 @@ function AdminStudents() {
               <input
                 type="text"
                 name="student_id"
-                value={form.student_id}
-                onChange={handleChange}
+                value={
+                  form.student_id
+                }
+                onChange={
+                  handleChange
+                }
                 required
                 placeholder="STD-001"
                 className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
@@ -352,6 +565,7 @@ function AdminStudents() {
             </div>
 
             {/* Name */}
+
             <div>
               <label className="mb-2 block text-sm font-semibold text-slate-700">
                 শিক্ষার্থীর নাম *
@@ -361,7 +575,9 @@ function AdminStudents() {
                 type="text"
                 name="name"
                 value={form.name}
-                onChange={handleChange}
+                onChange={
+                  handleChange
+                }
                 required
                 placeholder="যেমন: Ridwan Ahmed"
                 className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
@@ -369,6 +585,7 @@ function AdminStudents() {
             </div>
 
             {/* Roll */}
+
             <div>
               <label className="mb-2 block text-sm font-semibold text-slate-700">
                 Roll *
@@ -378,7 +595,9 @@ function AdminStudents() {
                 type="text"
                 name="roll"
                 value={form.roll}
-                onChange={handleChange}
+                onChange={
+                  handleChange
+                }
                 required
                 placeholder="01"
                 className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
@@ -386,6 +605,7 @@ function AdminStudents() {
             </div>
 
             {/* Class */}
+
             <div>
               <label className="mb-2 block text-sm font-semibold text-slate-700">
                 Class *
@@ -395,7 +615,9 @@ function AdminStudents() {
                 type="text"
                 name="class"
                 value={form.class}
-                onChange={handleChange}
+                onChange={
+                  handleChange
+                }
                 required
                 placeholder="যেমন: 10"
                 className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
@@ -403,6 +625,7 @@ function AdminStudents() {
             </div>
 
             {/* Section */}
+
             <div>
               <label className="mb-2 block text-sm font-semibold text-slate-700">
                 Section
@@ -411,14 +634,19 @@ function AdminStudents() {
               <input
                 type="text"
                 name="section"
-                value={form.section}
-                onChange={handleChange}
+                value={
+                  form.section
+                }
+                onChange={
+                  handleChange
+                }
                 placeholder="যেমন: A"
                 className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
               />
             </div>
 
             {/* Date of Birth */}
+
             <div>
               <label className="mb-2 block text-sm font-semibold text-slate-700">
                 জন্ম তারিখ
@@ -427,13 +655,18 @@ function AdminStudents() {
               <input
                 type="date"
                 name="date_of_birth"
-                value={form.date_of_birth}
-                onChange={handleChange}
+                value={
+                  form.date_of_birth
+                }
+                onChange={
+                  handleChange
+                }
                 className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
               />
             </div>
 
             {/* Email */}
+
             <div>
               <label className="mb-2 block text-sm font-semibold text-slate-700">
                 Email
@@ -443,13 +676,16 @@ function AdminStudents() {
                 type="email"
                 name="email"
                 value={form.email}
-                onChange={handleChange}
+                onChange={
+                  handleChange
+                }
                 placeholder="student@gmail.com"
                 className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
               />
             </div>
 
             {/* Phone */}
+
             <div>
               <label className="mb-2 block text-sm font-semibold text-slate-700">
                 Phone
@@ -459,13 +695,16 @@ function AdminStudents() {
                 type="text"
                 name="phone"
                 value={form.phone}
-                onChange={handleChange}
+                onChange={
+                  handleChange
+                }
                 placeholder="017XXXXXXXX"
                 className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
               />
             </div>
 
             {/* Status */}
+
             <div>
               <label className="mb-2 block text-sm font-semibold text-slate-700">
                 Status
@@ -475,8 +714,12 @@ function AdminStudents() {
                 <input
                   type="checkbox"
                   name="status"
-                  checked={form.status}
-                  onChange={handleChange}
+                  checked={
+                    form.status
+                  }
+                  onChange={
+                    handleChange
+                  }
                   className="h-4 w-4"
                 />
 
@@ -487,6 +730,7 @@ function AdminStudents() {
             </div>
 
             {/* Father */}
+
             <div>
               <label className="mb-2 block text-sm font-semibold text-slate-700">
                 পিতার নাম
@@ -495,14 +739,19 @@ function AdminStudents() {
               <input
                 type="text"
                 name="father_name"
-                value={form.father_name}
-                onChange={handleChange}
+                value={
+                  form.father_name
+                }
+                onChange={
+                  handleChange
+                }
                 placeholder="পিতার নাম"
                 className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
               />
             </div>
 
             {/* Mother */}
+
             <div>
               <label className="mb-2 block text-sm font-semibold text-slate-700">
                 মাতার নাম
@@ -511,14 +760,19 @@ function AdminStudents() {
               <input
                 type="text"
                 name="mother_name"
-                value={form.mother_name}
-                onChange={handleChange}
+                value={
+                  form.mother_name
+                }
+                onChange={
+                  handleChange
+                }
                 placeholder="মাতার নাম"
                 className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
               />
             </div>
 
             {/* Address */}
+
             <div className="md:col-span-2 lg:col-span-3">
               <label className="mb-2 block text-sm font-semibold text-slate-700">
                 ঠিকানা
@@ -526,8 +780,12 @@ function AdminStudents() {
 
               <textarea
                 name="address"
-                value={form.address}
-                onChange={handleChange}
+                value={
+                  form.address
+                }
+                onChange={
+                  handleChange
+                }
                 rows="3"
                 placeholder="শিক্ষার্থীর ঠিকানা..."
                 className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
@@ -535,6 +793,7 @@ function AdminStudents() {
             </div>
 
             {/* Submit */}
+
             <div className="md:col-span-2 lg:col-span-3">
               <button
                 type="submit"
@@ -551,9 +810,10 @@ function AdminStudents() {
           </form>
         </section>
 
-        {/* =========================
-            Student List
-        ========================== */}
+        {/* ==========================================
+            STUDENT LIST
+        ========================================== */}
+
         <section className="mt-8 rounded-2xl bg-white p-6 shadow-sm">
           <div>
             <h3 className="text-xl font-bold text-slate-900">
@@ -561,13 +821,15 @@ function AdminStudents() {
             </h3>
 
             <p className="mt-1 text-sm text-slate-500">
-              মোট শিক্ষার্থী: {students.length}
+              মোট শিক্ষার্থী:{" "}
+              {students.length}
             </p>
           </div>
 
           {students.length === 0 ? (
             <div className="mt-6 rounded-xl bg-slate-50 p-8 text-center text-slate-500">
-              কোনো শিক্ষার্থী পাওয়া যায়নি।
+              কোনো শিক্ষার্থী পাওয়া
+              যায়নি।
             </div>
           ) : (
             <div className="mt-6 overflow-x-auto">
@@ -613,86 +875,109 @@ function AdminStudents() {
                 </thead>
 
                 <tbody>
-                  {students.map((student, index) => (
-                    <tr
-                      key={student.id}
-                      className="border-b last:border-0"
-                    >
-                      <td className="px-4 py-4 text-sm">
-                        {index + 1}
-                      </td>
+                  {students.map(
+                    (
+                      student,
+                      index
+                    ) => (
+                      <tr
+                        key={
+                          student.id
+                        }
+                        className="border-b last:border-0"
+                      >
+                        <td className="px-4 py-4 text-sm">
+                          {index + 1}
+                        </td>
 
-                      <td className="px-4 py-4 text-sm font-medium text-slate-700">
-                        {student.student_id}
-                      </td>
+                        <td className="px-4 py-4 text-sm font-medium text-slate-700">
+                          {
+                            student.student_id
+                          }
+                        </td>
 
-                      <td className="px-4 py-4">
-                        <p className="font-semibold text-slate-900">
-                          {student.name}
-                        </p>
-
-                        {student.email && (
-                          <p className="mt-1 text-xs text-slate-500">
-                            {student.email}
+                        <td className="px-4 py-4">
+                          <p className="font-semibold text-slate-900">
+                            {
+                              student.name
+                            }
                           </p>
-                        )}
-                      </td>
 
-                      <td className="px-4 py-4 text-sm text-slate-600">
-                        {student.class}
-                      </td>
+                          {student.email && (
+                            <p className="mt-1 text-xs text-slate-500">
+                              {
+                                student.email
+                              }
+                            </p>
+                          )}
+                        </td>
 
-                      <td className="px-4 py-4 text-sm text-slate-600">
-                        {student.section || "—"}
-                      </td>
+                        <td className="px-4 py-4 text-sm text-slate-600">
+                          {
+                            student.class
+                          }
+                        </td>
 
-                      <td className="px-4 py-4 text-sm text-slate-600">
-                        {student.roll}
-                      </td>
+                        <td className="px-4 py-4 text-sm text-slate-600">
+                          {student.section ||
+                            "—"}
+                        </td>
 
-                      <td className="px-4 py-4 text-sm text-slate-600">
-                        {student.phone || "—"}
-                      </td>
+                        <td className="px-4 py-4 text-sm text-slate-600">
+                          {
+                            student.roll
+                          }
+                        </td>
 
-                      <td className="px-4 py-4">
-                        <span
-                          className={`rounded-full px-3 py-1 text-xs font-semibold ${
-                            student.status
-                              ? "bg-green-100 text-green-700"
-                              : "bg-red-100 text-red-600"
-                          }`}
-                        >
-                          {student.status
-                            ? "Active"
-                            : "Inactive"}
-                        </span>
-                      </td>
+                        <td className="px-4 py-4 text-sm text-slate-600">
+                          {student.phone ||
+                            "—"}
+                        </td>
 
-                      <td className="px-4 py-4">
-                        <div className="flex gap-2">
-                          <button
-                            type="button"
-                            onClick={() =>
-                              handleEdit(student)
-                            }
-                            className="rounded-lg bg-amber-100 px-3 py-2 text-xs font-semibold text-amber-700 transition hover:bg-amber-200"
+                        <td className="px-4 py-4">
+                          <span
+                            className={`rounded-full px-3 py-1 text-xs font-semibold ${
+                              student.status
+                                ? "bg-green-100 text-green-700"
+                                : "bg-red-100 text-red-600"
+                            }`}
                           >
-                            Edit
-                          </button>
+                            {student.status
+                              ? "Active"
+                              : "Inactive"}
+                          </span>
+                        </td>
 
-                          <button
-                            type="button"
-                            onClick={() =>
-                              handleDelete(student)
-                            }
-                            className="rounded-lg bg-red-100 px-3 py-2 text-xs font-semibold text-red-600 transition hover:bg-red-200"
-                          >
-                            Delete
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
+                        <td className="px-4 py-4">
+                          <div className="flex gap-2">
+                            <button
+                              type="button"
+                              onClick={() =>
+                                handleEdit(
+                                  student
+                                )
+                              }
+                              className="rounded-lg bg-amber-100 px-3 py-2 text-xs font-semibold text-amber-700 transition hover:bg-amber-200"
+                            >
+                              Edit
+                            </button>
+
+                            <button
+                              type="button"
+                              onClick={() =>
+                                handleDelete(
+                                  student
+                                )
+                              }
+                              className="rounded-lg bg-red-100 px-3 py-2 text-xs font-semibold text-red-600 transition hover:bg-red-200"
+                            >
+                              Delete
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    )
+                  )}
                 </tbody>
               </table>
             </div>

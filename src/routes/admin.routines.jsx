@@ -1,6 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 
 import { useEffect, useState } from "react";
+import toast from "react-hot-toast";
 import { apiRequest } from "@/services/api";
 
 export const Route = createFileRoute("/admin/routines")({
@@ -29,8 +30,6 @@ function AdminRoutines() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
 
   // ==========================================
   // LOAD ROUTINES
@@ -44,7 +43,9 @@ function AdminRoutines() {
     } catch (error) {
       console.error(error);
 
-      setError("Routine load করা যায়নি।");
+      toast.error(
+        error.message || "রুটিনের তথ্য লোড করা যায়নি।"
+      );
     }
   };
 
@@ -73,6 +74,10 @@ function AdminRoutines() {
 
         localStorage.removeItem("admin_token");
         localStorage.removeItem("admin_user");
+
+        toast.error(
+          "আপনার সেশন শেষ হয়েছে। আবার লগইন করুন।"
+        );
 
         navigate({
           to: "/admin/login",
@@ -106,7 +111,14 @@ function AdminRoutines() {
   const resetForm = () => {
     setForm(emptyForm);
     setEditingId(null);
-    setError("");
+  };
+
+  const handleCancelEdit = () => {
+    resetForm();
+
+    toast("Edit বাতিল করা হয়েছে।", {
+      icon: "↩️",
+    });
   };
 
   // ==========================================
@@ -116,9 +128,6 @@ function AdminRoutines() {
   const handleSubmit = async (event) => {
     event.preventDefault();
 
-    setError("");
-    setSuccess("");
-
     if (
       !form.class_name.trim() ||
       !form.day.trim() ||
@@ -126,10 +135,18 @@ function AdminRoutines() {
       !form.subject.trim() ||
       !form.teacher.trim()
     ) {
-      setError("Class, Day, Time, Subject এবং Teacher অবশ্যই দিতে হবে।");
+      toast.error(
+        "Class, Day, Time, Subject এবং Teacher অবশ্যই দিতে হবে।"
+      );
 
       return;
     }
+
+    const toastId = toast.loading(
+      editingId
+        ? "রুটিন আপডেট করা হচ্ছে..."
+        : "নতুন রুটিন যোগ করা হচ্ছে..."
+    );
 
     try {
       setSaving(true);
@@ -140,24 +157,39 @@ function AdminRoutines() {
           body: JSON.stringify(form),
         });
 
-        setSuccess("Routine successfully updated.");
+        toast.success(
+          "রুটিন সফলভাবে আপডেট হয়েছে।",
+          {
+            id: toastId,
+          }
+        );
       } else {
         await apiRequest("/routines", {
           method: "POST",
           body: JSON.stringify(form),
         });
 
-        setSuccess("Routine successfully added.");
+        toast.success(
+          "নতুন রুটিন সফলভাবে যোগ হয়েছে।",
+          {
+            id: toastId,
+          }
+        );
       }
 
-      setForm(emptyForm);
-      setEditingId(null);
+      resetForm();
 
       await loadRoutines();
     } catch (error) {
       console.error(error);
 
-      setError(error.message || "Routine save করা যায়নি।");
+      toast.error(
+        error.message ||
+          "রুটিনের তথ্য সংরক্ষণ করা যায়নি।",
+        {
+          id: toastId,
+        }
+      );
     } finally {
       setSaving(false);
     }
@@ -188,8 +220,9 @@ function AdminRoutines() {
       is_active: Boolean(routine.is_active),
     });
 
-    setError("");
-    setSuccess("");
+    toast("রুটিন Edit Mode-এ খোলা হয়েছে।", {
+      icon: "✏️",
+    });
 
     window.scrollTo({
       top: 0,
@@ -201,27 +234,83 @@ function AdminRoutines() {
   // DELETE ROUTINE
   // ==========================================
 
-  const handleDelete = async (id) => {
-    const confirmed = window.confirm("এই routine delete করতে চান?");
-
-    if (!confirmed) return;
+  const deleteRoutine = async (routine) => {
+    const toastId = toast.loading(
+      "রুটিন মুছে ফেলা হচ্ছে..."
+    );
 
     try {
-      setError("");
-      setSuccess("");
-
-      await apiRequest(`/routines/${id}`, {
+      await apiRequest(`/routines/${routine.id}`, {
         method: "DELETE",
       });
 
-      setSuccess("Routine successfully deleted.");
+      if (editingId === routine.id) {
+        resetForm();
+      }
 
       await loadRoutines();
+
+      toast.success(
+        "রুটিন সফলভাবে মুছে ফেলা হয়েছে।",
+        {
+          id: toastId,
+        }
+      );
     } catch (error) {
       console.error(error);
 
-      setError(error.message || "Routine delete করা যায়নি।");
+      toast.error(
+        error.message ||
+          "রুটিন মুছে ফেলা যায়নি।",
+        {
+          id: toastId,
+        }
+      );
     }
+  };
+
+  const handleDelete = (routine) => {
+    toast(
+      (t) => (
+        <div className="min-w-[260px]">
+          <p className="font-bold text-white">
+            রুটিন মুছে ফেলবেন?
+          </p>
+
+          <p className="mt-1 text-xs leading-5 text-slate-300">
+            Class {routine.class_name} এর {routine.day} দিনের
+            {routine.subject
+              ? ` ${routine.subject}`
+              : ""} রুটিন স্থায়ীভাবে মুছে যাবে।
+          </p>
+
+          <div className="mt-4 flex justify-end gap-2">
+            <button
+              type="button"
+              onClick={() => toast.dismiss(t.id)}
+              className="rounded-lg bg-slate-700 px-3 py-2 text-xs font-semibold text-white transition hover:bg-slate-600"
+            >
+              বাতিল
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                toast.dismiss(t.id);
+                deleteRoutine(routine);
+              }}
+              className="rounded-lg bg-red-500 px-3 py-2 text-xs font-semibold text-white transition hover:bg-red-600"
+            >
+              মুছে ফেলুন
+            </button>
+          </div>
+        </div>
+      ),
+      {
+        duration: Infinity,
+        icon: "⚠️",
+      }
+    );
   };
 
   // ==========================================
@@ -276,22 +365,6 @@ function AdminRoutines() {
 
             <p className="mt-1 text-sm text-slate-500">Class routine information</p>
           </div>
-
-          {/* Error */}
-
-          {error && (
-            <div className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
-              {error}
-            </div>
-          )}
-
-          {/* Success */}
-
-          {success && (
-            <div className="mb-4 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700">
-              {success}
-            </div>
-          )}
 
           <form onSubmit={handleSubmit} className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {/* Class */}
@@ -441,7 +514,7 @@ function AdminRoutines() {
               {editingId && (
                 <button
                   type="button"
-                  onClick={resetForm}
+                  onClick={handleCancelEdit}
                   className="rounded-lg border border-slate-300 px-5 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
                 >
                   Cancel
@@ -554,7 +627,7 @@ function AdminRoutines() {
 
                           <button
                             type="button"
-                            onClick={() => handleDelete(routine.id)}
+                            onClick={() => handleDelete(routine)}
                             className="rounded-lg bg-red-100 px-3 py-1.5 text-xs font-semibold text-red-700 transition hover:bg-red-200"
                           >
                             Delete

@@ -4,6 +4,7 @@ import {
   useNavigate,
 } from "@tanstack/react-router";
 
+import toast from "react-hot-toast";
 import { apiRequest } from "../services/api";
 
 export const Route = createFileRoute("/admin/login")({
@@ -16,22 +17,27 @@ function AdminLogin() {
   const [email, setEmail] = useState("admin@gmail.com");
   const [password, setPassword] = useState("password");
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    const toastId = toast.loading(
+      "লগইন করা হচ্ছে..."
+    );
+
     try {
       setLoading(true);
-      setError("");
 
-      const response = await apiRequest("/auth/login", {
-        method: "POST",
-        body: JSON.stringify({
-          email,
-          password,
-        }),
-      });
+      const response = await apiRequest(
+        "/auth/login",
+        {
+          method: "POST",
+          body: JSON.stringify({
+            email,
+            password,
+          }),
+        }
+      );
 
       window.localStorage.setItem(
         "admin_token",
@@ -43,14 +49,25 @@ function AdminLogin() {
         JSON.stringify(response.data.user)
       );
 
+      toast.success(
+        "সফলভাবে লগইন হয়েছে",
+        {
+          id: toastId,
+        }
+      );
+
       navigate({
         to: "/admin/dashboard",
       });
     } catch (err) {
       console.error(err);
 
-      setError(
-        err.message || "Login failed"
+      toast.error(
+        err.message ||
+          "ই-মেইল অথবা পাসওয়ার্ড সঠিক নয়",
+        {
+          id: toastId,
+        }
       );
     } finally {
       setLoading(false);
@@ -73,12 +90,6 @@ function AdminLogin() {
             ডিজিটাল বিদ্যালয় ম্যানেজমেন্ট সিস্টেম
           </p>
         </div>
-
-        {error && (
-          <div className="mt-6 rounded-xl bg-red-50 p-3 text-sm text-red-600">
-            {error}
-          </div>
-        )}
 
         <form
           onSubmit={handleSubmit}

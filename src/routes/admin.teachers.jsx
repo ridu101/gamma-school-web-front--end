@@ -6,6 +6,7 @@ import {
   useNavigate,
 } from "@tanstack/react-router";
 
+import toast from "react-hot-toast";
 import { apiRequest } from "../services/api";
 
 export const Route = createFileRoute("/admin/teachers")({
@@ -35,9 +36,6 @@ function AdminTeachers() {
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
 
   // ==========================================
   // AUTH + LOAD TEACHERS
@@ -75,6 +73,10 @@ function AdminTeachers() {
           "admin_user"
         );
 
+        toast.error(
+          "আপনার সেশন শেষ হয়েছে। আবার লগইন করুন।"
+        );
+
         navigate({
           to: "/admin/login",
           replace: true,
@@ -100,12 +102,15 @@ function AdminTeachers() {
     } catch (error) {
       console.error(error);
 
-      setError(error.message);
+      toast.error(
+        error.message ||
+          "শিক্ষকদের তথ্য লোড করা যায়নি।"
+      );
     }
   };
 
   // ==========================================
-  // NORMAL INPUT CHANGE
+  // INPUT CHANGE
   // ==========================================
 
   const handleChange = (event) => {
@@ -118,6 +123,7 @@ function AdminTeachers() {
 
     setForm((previous) => ({
       ...previous,
+
       [name]:
         type === "checkbox"
           ? checked
@@ -126,11 +132,12 @@ function AdminTeachers() {
   };
 
   // ==========================================
-  // IMAGE CHANGE
+  // PHOTO CHANGE
   // ==========================================
 
   const handlePhotoChange = (event) => {
-    const file = event.target.files?.[0];
+    const file =
+      event.target.files?.[0];
 
     if (!file) {
       return;
@@ -142,26 +149,31 @@ function AdminTeachers() {
       "image/webp",
     ];
 
-    if (!allowedTypes.includes(file.type)) {
-      setError(
+    if (
+      !allowedTypes.includes(file.type)
+    ) {
+      toast.error(
         "শুধু JPG, JPEG, PNG অথবা WEBP ছবি ব্যবহার করুন।"
       );
 
       event.target.value = "";
+
       return;
     }
 
-    // 3MB limit
-    if (file.size > 3 * 1024 * 1024) {
-      setError(
+    // Maximum 3MB
+    if (
+      file.size >
+      3 * 1024 * 1024
+    ) {
+      toast.error(
         "ছবির সাইজ সর্বোচ্চ 3MB হতে পারবে।"
       );
 
       event.target.value = "";
+
       return;
     }
-
-    setError("");
 
     setPhotoFile(file);
 
@@ -191,10 +203,14 @@ function AdminTeachers() {
   const handleSubmit = async (event) => {
     event.preventDefault();
 
+    const toastId = toast.loading(
+      editingId
+        ? "শিক্ষকের তথ্য আপডেট করা হচ্ছে..."
+        : "শিক্ষক যোগ করা হচ্ছে..."
+    );
+
     try {
       setSaving(true);
-      setError("");
-      setSuccess("");
 
       const formData = new FormData();
 
@@ -233,7 +249,7 @@ function AdminTeachers() {
         form.is_active ? "1" : "0"
       );
 
-      // Image selected থাকলে পাঠাবে
+      // Photo selected
       if (photoFile) {
         formData.append(
           "photo",
@@ -246,11 +262,6 @@ function AdminTeachers() {
       // ======================================
 
       if (editingId) {
-        /*
-          Multipart FormData + Laravel update-এর জন্য
-          POST request-এর সাথে method spoofing করছি।
-        */
-
         formData.append(
           "_method",
           "PUT"
@@ -264,8 +275,11 @@ function AdminTeachers() {
           }
         );
 
-        setSuccess(
-          "শিক্ষকের তথ্য সফলভাবে আপডেট হয়েছে।"
+        toast.success(
+          "শিক্ষকের তথ্য সফলভাবে আপডেট হয়েছে।",
+          {
+            id: toastId,
+          }
         );
       }
 
@@ -274,13 +288,19 @@ function AdminTeachers() {
       // ======================================
 
       else {
-        await apiRequest("/teachers", {
-          method: "POST",
-          body: formData,
-        });
+        await apiRequest(
+          "/teachers",
+          {
+            method: "POST",
+            body: formData,
+          }
+        );
 
-        setSuccess(
-          "নতুন শিক্ষক সফলভাবে যোগ হয়েছে।"
+        toast.success(
+          "নতুন শিক্ষক সফলভাবে যোগ হয়েছে।",
+          {
+            id: toastId,
+          }
         );
       }
 
@@ -290,9 +310,12 @@ function AdminTeachers() {
     } catch (error) {
       console.error(error);
 
-      setError(
+      toast.error(
         error.message ||
-          "শিক্ষকের তথ্য save করা যায়নি।"
+          "শিক্ষকের তথ্য সংরক্ষণ করা যায়নি।",
+        {
+          id: toastId,
+        }
       );
     } finally {
       setSaving(false);
@@ -326,19 +349,23 @@ function AdminTeachers() {
         teacher.bio || "",
 
       is_active:
-        Boolean(teacher.is_active),
+        Boolean(
+          teacher.is_active
+        ),
     });
 
-    // Existing backend photo
     setPhotoPreview(
       teacher.photo || ""
     );
 
-    // নতুন file এখনো select হয়নি
     setPhotoFile(null);
 
-    setError("");
-    setSuccess("");
+    toast(
+      "শিক্ষকের তথ্য Edit Mode-এ খোলা হয়েছে।",
+      {
+        icon: "✏️",
+      }
+    );
 
     window.scrollTo({
       top: 0,
@@ -353,27 +380,27 @@ function AdminTeachers() {
   const handleCancelEdit = () => {
     resetForm();
 
-    setError("");
-    setSuccess("");
+    toast(
+      "Edit বাতিল করা হয়েছে।",
+      {
+        icon: "↩️",
+      }
+    );
   };
 
   // ==========================================
   // DELETE TEACHER
   // ==========================================
 
-  const handleDelete = async (teacher) => {
-    const confirmed = window.confirm(
-      `${teacher.name} কে delete করতে চান?`
-    );
-
-    if (!confirmed) {
-      return;
-    }
+  const deleteTeacher = async (
+    teacher
+  ) => {
+    const toastId =
+      toast.loading(
+        "শিক্ষক মুছে ফেলা হচ্ছে..."
+      );
 
     try {
-      setError("");
-      setSuccess("");
-
       await apiRequest(
         `/teachers/${teacher.id}`,
         {
@@ -381,20 +408,85 @@ function AdminTeachers() {
         }
       );
 
-      setSuccess(
-        "শিক্ষক সফলভাবে delete হয়েছে।"
-      );
-
-      if (editingId === teacher.id) {
+      if (
+        editingId ===
+        teacher.id
+      ) {
         resetForm();
       }
 
       await loadTeachers();
+
+      toast.success(
+        "শিক্ষক সফলভাবে মুছে ফেলা হয়েছে।",
+        {
+          id: toastId,
+        }
+      );
     } catch (error) {
       console.error(error);
 
-      setError(error.message);
+      toast.error(
+        error.message ||
+          "শিক্ষক মুছে ফেলা যায়নি।",
+        {
+          id: toastId,
+        }
+      );
     }
+  };
+
+  // ==========================================
+  // DELETE CONFIRM TOAST
+  // ==========================================
+
+  const handleDelete = (
+    teacher
+  ) => {
+    toast(
+      (t) => (
+        <div className="min-w-[260px]">
+          <p className="font-bold text-white">
+            শিক্ষক মুছে ফেলবেন?
+          </p>
+
+          <p className="mt-1 text-xs leading-5 text-slate-300">
+            {teacher.name} এর তথ্য
+            স্থায়ীভাবে মুছে যাবে।
+          </p>
+
+          <div className="mt-4 flex justify-end gap-2">
+            <button
+              type="button"
+              onClick={() =>
+                toast.dismiss(t.id)
+              }
+              className="rounded-lg bg-slate-700 px-3 py-2 text-xs font-semibold text-white transition hover:bg-slate-600"
+            >
+              বাতিল
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                toast.dismiss(t.id);
+
+                deleteTeacher(
+                  teacher
+                );
+              }}
+              className="rounded-lg bg-red-500 px-3 py-2 text-xs font-semibold text-white transition hover:bg-red-600"
+            >
+              মুছে ফেলুন
+            </button>
+          </div>
+        </div>
+      ),
+      {
+        duration: Infinity,
+        icon: "⚠️",
+      }
+    );
   };
 
   // ==========================================
@@ -443,40 +535,24 @@ function AdminTeachers() {
       ========================================== */}
 
       <main className="mx-auto max-w-7xl px-4 py-8">
-        {/* Page Heading */}
-
         <div>
           <h2 className="text-3xl font-bold text-slate-900">
             শিক্ষক পরিচালনা
           </h2>
 
           <p className="mt-2 text-sm text-slate-500">
-            এখান থেকে শিক্ষক যোগ, edit এবং delete করতে পারবেন।
+            এখান থেকে শিক্ষক যোগ,
+            সম্পাদনা এবং মুছে ফেলতে
+            পারবেন।
           </p>
         </div>
-
-        {/* ==========================================
-            MESSAGES
-        ========================================== */}
-
-        {error && (
-          <div className="mt-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
-            {error}
-          </div>
-        )}
-
-        {success && (
-          <div className="mt-6 rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700">
-            {success}
-          </div>
-        )}
 
         {/* ==========================================
             FORM
         ========================================== */}
 
         <section className="mt-8 rounded-2xl bg-white p-6 shadow-sm">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between gap-4">
             <h3 className="text-xl font-bold text-slate-900">
               {editingId
                 ? "শিক্ষকের তথ্য Edit করুন"
@@ -486,7 +562,9 @@ function AdminTeachers() {
             {editingId && (
               <button
                 type="button"
-                onClick={handleCancelEdit}
+                onClick={
+                  handleCancelEdit
+                }
                 className="text-sm font-semibold text-red-500"
               >
                 Cancel Edit
@@ -495,7 +573,9 @@ function AdminTeachers() {
           </div>
 
           <form
-            onSubmit={handleSubmit}
+            onSubmit={
+              handleSubmit
+            }
             className="mt-6 grid gap-5 md:grid-cols-2"
           >
             {/* Name */}
@@ -509,7 +589,9 @@ function AdminTeachers() {
                 type="text"
                 name="name"
                 value={form.name}
-                onChange={handleChange}
+                onChange={
+                  handleChange
+                }
                 required
                 placeholder="যেমন: Mohammad Rahman"
                 className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
@@ -526,8 +608,12 @@ function AdminTeachers() {
               <input
                 type="text"
                 name="designation"
-                value={form.designation}
-                onChange={handleChange}
+                value={
+                  form.designation
+                }
+                onChange={
+                  handleChange
+                }
                 placeholder="যেমন: Senior Lecturer"
                 className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
               />
@@ -543,8 +629,12 @@ function AdminTeachers() {
               <input
                 type="text"
                 name="department"
-                value={form.department}
-                onChange={handleChange}
+                value={
+                  form.department
+                }
+                onChange={
+                  handleChange
+                }
                 placeholder="যেমন: Computer Science"
                 className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
               />
@@ -561,7 +651,9 @@ function AdminTeachers() {
                 type="email"
                 name="email"
                 value={form.email}
-                onChange={handleChange}
+                onChange={
+                  handleChange
+                }
                 placeholder="teacher@gmail.com"
                 className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
               />
@@ -578,7 +670,9 @@ function AdminTeachers() {
                 type="text"
                 name="phone"
                 value={form.phone}
-                onChange={handleChange}
+                onChange={
+                  handleChange
+                }
                 placeholder="017XXXXXXXX"
                 className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
               />
@@ -595,8 +689,12 @@ function AdminTeachers() {
                 <input
                   type="checkbox"
                   name="is_active"
-                  checked={form.is_active}
-                  onChange={handleChange}
+                  checked={
+                    form.is_active
+                  }
+                  onChange={
+                    handleChange
+                  }
                   className="h-4 w-4"
                 />
 
@@ -607,7 +705,7 @@ function AdminTeachers() {
             </div>
 
             {/* ======================================
-                TEACHER PHOTO
+                PHOTO
             ====================================== */}
 
             <div className="md:col-span-2">
@@ -617,42 +715,47 @@ function AdminTeachers() {
 
               <div className="rounded-xl border border-dashed border-slate-300 bg-slate-50 p-5">
                 <div className="flex flex-col gap-5 sm:flex-row sm:items-center">
-                  {/* Preview */}
-
                   <div className="flex h-28 w-28 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-slate-200 bg-white">
                     {photoPreview ? (
                       <img
-                        src={photoPreview}
+                        src={
+                          photoPreview
+                        }
                         alt="Teacher Preview"
                         className="h-full w-full object-cover"
                       />
                     ) : (
                       <span className="px-3 text-center text-xs text-slate-400">
-                        কোনো ছবি নির্বাচন করা হয়নি
+                        কোনো ছবি নির্বাচন
+                        করা হয়নি
                       </span>
                     )}
                   </div>
-
-                  {/* Upload */}
 
                   <div className="flex-1">
                     <input
                       type="file"
                       accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
-                      onChange={handlePhotoChange}
+                      onChange={
+                        handlePhotoChange
+                      }
                       className="block w-full cursor-pointer rounded-lg border border-slate-300 bg-white text-sm text-slate-600 file:mr-4 file:border-0 file:bg-blue-600 file:px-4 file:py-3 file:font-semibold file:text-white hover:file:bg-blue-700"
                     />
 
                     <p className="mt-2 text-xs text-slate-500">
-                      JPG, JPEG, PNG অথবা WEBP ছবি ব্যবহার করুন।
-                      সর্বোচ্চ সাইজ 3MB।
+                      JPG, JPEG, PNG
+                      অথবা WEBP।
+                      সর্বোচ্চ 3MB।
                     </p>
 
-                    {editingId && photoPreview && (
-                      <p className="mt-2 text-xs font-medium text-blue-600">
-                        নতুন ছবি select না করলে আগের ছবিই থাকবে।
-                      </p>
-                    )}
+                    {editingId &&
+                      photoPreview && (
+                        <p className="mt-2 text-xs font-medium text-blue-600">
+                          নতুন ছবি না
+                          দিলে আগের
+                          ছবিই থাকবে।
+                        </p>
+                      )}
                   </div>
                 </div>
               </div>
@@ -668,7 +771,9 @@ function AdminTeachers() {
               <textarea
                 name="bio"
                 value={form.bio}
-                onChange={handleChange}
+                onChange={
+                  handleChange
+                }
                 rows="4"
                 placeholder="শিক্ষক সম্পর্কে সংক্ষিপ্ত তথ্য..."
                 className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
@@ -704,13 +809,15 @@ function AdminTeachers() {
             </h3>
 
             <p className="mt-1 text-sm text-slate-500">
-              মোট শিক্ষক: {teachers.length}
+              মোট শিক্ষক:{" "}
+              {teachers.length}
             </p>
           </div>
 
           {teachers.length === 0 ? (
             <div className="mt-6 rounded-xl bg-slate-50 p-8 text-center text-slate-500">
-              কোনো শিক্ষক পাওয়া যায়নি।
+              কোনো শিক্ষক পাওয়া
+              যায়নি।
             </div>
           ) : (
             <div className="mt-6 overflow-x-auto">
@@ -753,13 +860,16 @@ function AdminTeachers() {
 
                 <tbody>
                   {teachers.map(
-                    (teacher, index) => (
+                    (
+                      teacher,
+                      index
+                    ) => (
                       <tr
-                        key={teacher.id}
+                        key={
+                          teacher.id
+                        }
                         className="border-b last:border-0"
                       >
-                        {/* Number */}
-
                         <td className="px-4 py-4 text-sm">
                           {index + 1}
                         </td>
@@ -769,12 +879,16 @@ function AdminTeachers() {
                         <td className="px-4 py-4">
                           {teacher.photo ? (
                             <img
-                              src={teacher.photo}
-                              alt={teacher.name}
+                              src={
+                                teacher.photo
+                              }
+                              alt={
+                                teacher.name
+                              }
                               className="h-14 w-14 rounded-xl border border-slate-200 object-cover"
                             />
                           ) : (
-                            <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-slate-100 text-xs text-slate-400">
+                            <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-slate-100 text-center text-xs text-slate-400">
                               No Photo
                             </div>
                           )}
@@ -784,34 +898,33 @@ function AdminTeachers() {
 
                         <td className="px-4 py-4">
                           <p className="font-semibold text-slate-900">
-                            {teacher.name}
+                            {
+                              teacher.name
+                            }
                           </p>
 
                           {teacher.phone && (
                             <p className="mt-1 text-xs text-slate-500">
-                              {teacher.phone}
+                              {
+                                teacher.phone
+                              }
                             </p>
                           )}
                         </td>
-
-                        {/* Designation */}
 
                         <td className="px-4 py-4 text-sm text-slate-600">
                           {teacher.designation ||
                             "—"}
                         </td>
 
-                        {/* Department */}
-
                         <td className="px-4 py-4 text-sm text-slate-600">
                           {teacher.department ||
                             "—"}
                         </td>
 
-                        {/* Email */}
-
                         <td className="px-4 py-4 text-sm text-slate-600">
-                          {teacher.email || "—"}
+                          {teacher.email ||
+                            "—"}
                         </td>
 
                         {/* Status */}

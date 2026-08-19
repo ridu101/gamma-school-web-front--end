@@ -5,6 +5,7 @@ import {
   useNavigate,
 } from "@tanstack/react-router";
 
+import toast from "react-hot-toast";
 import { apiRequest } from "../services/api";
 
 export const Route = createFileRoute("/admin/results")({
@@ -37,9 +38,6 @@ function AdminResults() {
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
 
   // =========================
   // Initialize Page
@@ -74,6 +72,10 @@ function AdminResults() {
         window.localStorage.removeItem("admin_token");
         window.localStorage.removeItem("admin_user");
 
+        toast.error(
+          "আপনার সেশন শেষ হয়েছে। আবার লগইন করুন।"
+        );
+
         navigate({
           to: "/admin/login",
           replace: true,
@@ -94,7 +96,12 @@ function AdminResults() {
       const response = await apiRequest("/results");
       setResults(response.data || []);
     } catch (error) {
-      setError(error.message);
+      console.error(error);
+
+      toast.error(
+        error.message ||
+          "ফলাফলের তথ্য লোড করা যায়নি।"
+      );
     }
   };
 
@@ -149,6 +156,9 @@ function AdminResults() {
   // =========================
   const removeSubject = (index) => {
     if (form.subjects.length === 1) {
+      toast.error(
+        "অন্তত একটি বিষয় রাখতে হবে।"
+      );
       return;
     }
 
@@ -162,15 +172,31 @@ function AdminResults() {
   };
 
   // =========================
+  // Reset Form
+  // =========================
+  const resetForm = () => {
+    setEditingId(null);
+
+    setForm({
+      ...emptyForm,
+      subjects: [newSubject()],
+    });
+  };
+
+  // =========================
   // Submit Add / Update
   // =========================
   const handleSubmit = async (event) => {
     event.preventDefault();
 
+    const toastId = toast.loading(
+      editingId
+        ? "ফলাফল আপডেট করা হচ্ছে..."
+        : "নতুন ফলাফল যোগ করা হচ্ছে..."
+    );
+
     try {
       setSaving(true);
-      setError("");
-      setSuccess("");
 
       const data = {
         student_id: Number(form.student_id),
@@ -197,8 +223,11 @@ function AdminResults() {
           }
         );
 
-        setSuccess(
-          "ফলাফল সফলভাবে আপডেট হয়েছে।"
+        toast.success(
+          "ফলাফল সফলভাবে আপডেট হয়েছে।",
+          {
+            id: toastId,
+          }
         );
       } else {
         await apiRequest("/results", {
@@ -206,22 +235,27 @@ function AdminResults() {
           body: JSON.stringify(data),
         });
 
-        setSuccess(
-          "নতুন ফলাফল সফলভাবে যোগ হয়েছে।"
+        toast.success(
+          "নতুন ফলাফল সফলভাবে যোগ হয়েছে।",
+          {
+            id: toastId,
+          }
         );
       }
 
-      setEditingId(null);
-
-      setForm({
-        ...emptyForm,
-        subjects: [newSubject()],
-      });
+      resetForm();
 
       await loadResults();
     } catch (error) {
       console.error(error);
-      setError(error.message);
+
+      toast.error(
+        error.message ||
+          "ফলাফল সংরক্ষণ করা যায়নি।",
+        {
+          id: toastId,
+        }
+      );
     } finally {
       setSaving(false);
     }
@@ -254,8 +288,12 @@ function AdminResults() {
           : [newSubject()],
     });
 
-    setError("");
-    setSuccess("");
+    toast(
+      "ফলাফল Edit Mode-এ খোলা হয়েছে।",
+      {
+        icon: "✏️",
+      }
+    );
 
     window.scrollTo({
       top: 0,
@@ -267,36 +305,25 @@ function AdminResults() {
   // Cancel Edit
   // =========================
   const handleCancelEdit = () => {
-    setEditingId(null);
+    resetForm();
 
-    setForm({
-      ...emptyForm,
-      subjects: [newSubject()],
-    });
-
-    setError("");
-    setSuccess("");
+    toast(
+      "Edit বাতিল করা হয়েছে।",
+      {
+        icon: "↩️",
+      }
+    );
   };
 
   // =========================
   // Delete Result
   // =========================
-  const handleDelete = async (result) => {
-    const studentName =
-      result.student?.name || "এই শিক্ষার্থী";
-
-    const confirmed = window.confirm(
-      `${studentName}-এর ${result.exam_name} ফলাফল delete করতে চান?`
+  const deleteResult = async (result) => {
+    const toastId = toast.loading(
+      "ফলাফল মুছে ফেলা হচ্ছে..."
     );
 
-    if (!confirmed) {
-      return;
-    }
-
     try {
-      setError("");
-      setSuccess("");
-
       await apiRequest(
         `/results/${result.id}`,
         {
@@ -304,19 +331,80 @@ function AdminResults() {
         }
       );
 
-      setSuccess(
-        "ফলাফল সফলভাবে delete হয়েছে।"
-      );
-
       if (editingId === result.id) {
-        handleCancelEdit();
+        resetForm();
       }
 
       await loadResults();
+
+      toast.success(
+        "ফলাফল সফলভাবে মুছে ফেলা হয়েছে।",
+        {
+          id: toastId,
+        }
+      );
     } catch (error) {
       console.error(error);
-      setError(error.message);
+
+      toast.error(
+        error.message ||
+          "ফলাফল মুছে ফেলা যায়নি।",
+        {
+          id: toastId,
+        }
+      );
     }
+  };
+
+  // =========================
+  // Delete Confirmation
+  // =========================
+  const handleDelete = (result) => {
+    const studentName =
+      result.student?.name || "এই শিক্ষার্থী";
+
+    toast(
+      (t) => (
+        <div className="min-w-67.5">
+          <p className="font-bold text-white">
+            ফলাফল মুছে ফেলবেন?
+          </p>
+
+          <p className="mt-1 text-xs leading-5 text-slate-300">
+            {studentName}-এর{" "}
+            {result.exam_name} ফলাফল
+            স্থায়ীভাবে মুছে যাবে।
+          </p>
+
+          <div className="mt-4 flex justify-end gap-2">
+            <button
+              type="button"
+              onClick={() =>
+                toast.dismiss(t.id)
+              }
+              className="rounded-lg bg-slate-700 px-3 py-2 text-xs font-semibold text-white transition hover:bg-slate-600"
+            >
+              বাতিল
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                toast.dismiss(t.id);
+                deleteResult(result);
+              }}
+              className="rounded-lg bg-red-500 px-3 py-2 text-xs font-semibold text-white transition hover:bg-red-600"
+            >
+              মুছে ফেলুন
+            </button>
+          </div>
+        </div>
+      ),
+      {
+        duration: Infinity,
+        icon: "⚠️",
+      }
+    );
   };
 
   if (loading) {
@@ -364,19 +452,6 @@ function AdminResults() {
             শিক্ষার্থীর পরীক্ষার ফলাফল পরিচালনা করুন।
           </p>
         </div>
-
-        {/* Messages */}
-        {error && (
-          <div className="mt-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
-            {error}
-          </div>
-        )}
-
-        {success && (
-          <div className="mt-6 rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700">
-            {success}
-          </div>
-        )}
 
         {/* =========================
             Result Form

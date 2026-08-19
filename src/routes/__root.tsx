@@ -1,4 +1,6 @@
+import { Toaster } from "react-hot-toast";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+
 import {
   Outlet,
   Link,
@@ -7,20 +9,32 @@ import {
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
+
 import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 
+// ==========================================
+// 404 PAGE
+// ==========================================
+
 function NotFoundComponent() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="max-w-md text-center">
-        <h1 className="text-7xl font-bold text-foreground">404</h1>
-        <h2 className="mt-4 text-xl font-semibold text-foreground">Page not found</h2>
+        <h1 className="text-7xl font-bold text-foreground">
+          404
+        </h1>
+
+        <h2 className="mt-4 text-xl font-semibold text-foreground">
+          Page not found
+        </h2>
+
         <p className="mt-2 text-sm text-muted-foreground">
           The page you're looking for doesn't exist or has been moved.
         </p>
+
         <div className="mt-6">
           <Link
             to="/"
@@ -34,11 +48,25 @@ function NotFoundComponent() {
   );
 }
 
-function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
+// ==========================================
+// ERROR PAGE
+// ==========================================
+
+function ErrorComponent({
+  error,
+  reset,
+}: {
+  error: Error;
+  reset: () => void;
+}) {
   console.error(error);
+
   const router = useRouter();
+
   useEffect(() => {
-    reportLovableError(error, { boundary: "tanstack_root_error_component" });
+    reportLovableError(error, {
+      boundary: "tanstack_root_error_component",
+    });
   }, [error]);
 
   return (
@@ -47,9 +75,11 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
         <h1 className="text-xl font-semibold tracking-tight text-foreground">
           This page didn't load
         </h1>
+
         <p className="mt-2 text-sm text-muted-foreground">
           Something went wrong on our end. You can try refreshing or head back home.
         </p>
+
         <div className="mt-6 flex flex-wrap justify-center gap-2">
           <button
             onClick={() => {
@@ -60,6 +90,7 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
           >
             Try again
           </button>
+
           <a
             href="/"
             className="inline-flex items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-accent"
@@ -72,60 +103,182 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   );
 }
 
-export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
-  head: () => ({
-    meta: [
-      { charSet: "utf-8" },
-      { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Digital School" },
-      { name: "description", content: "আধুনিক শিক্ষা ও ডিজিটাল সেবার প্ল্যাটফর্ম।" },
-      { property: "og:title", content: "ডিজিটাল আদর্শ বিদ্যালয়" },
-      { property: "og:description", content: "আধুনিক শিক্ষা ও ডিজিটাল সেবার প্ল্যাটফর্ম।" },
-      { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary_large_image" },
-    ],
-    links: [
-      {
-        rel: "stylesheet",
-        href: appCss,
-      },
-      { rel: "preconnect", href: "https://fonts.googleapis.com" },
-      { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
-      {
-        rel: "stylesheet",
-        href: "https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&display=swap",
-      },
-      { rel: "icon", href: "/public/school.png", type: "image/x-icon" },
-    ],
-  }),
+// ==========================================
+// ROOT ROUTE
+// ==========================================
 
-  shellComponent: RootShell,
-  component: RootComponent,
-  notFoundComponent: NotFoundComponent,
-  errorComponent: ErrorComponent,
-});
+export const Route =
+  createRootRouteWithContext<{
+    queryClient: QueryClient;
+  }>()({
+    head: () => ({
+      meta: [
+        {
+          charSet: "utf-8",
+        },
 
-function RootShell({ children }: { children: ReactNode }) {
+        {
+          name: "viewport",
+          content:
+            "width=device-width, initial-scale=1",
+        },
+
+        {
+          title: "Digital School",
+        },
+
+        {
+          name: "description",
+          content:
+            "আধুনিক শিক্ষা ও ডিজিটাল সেবার প্ল্যাটফর্ম।",
+        },
+
+        {
+          property: "og:title",
+          content: "ডিজিটাল আদর্শ বিদ্যালয়",
+        },
+
+        {
+          property: "og:description",
+          content:
+            "আধুনিক শিক্ষা ও ডিজিটাল সেবার প্ল্যাটফর্ম।",
+        },
+
+        {
+          property: "og:type",
+          content: "website",
+        },
+
+        {
+          name: "twitter:card",
+          content: "summary_large_image",
+        },
+      ],
+
+      links: [
+        {
+          rel: "stylesheet",
+          href: appCss,
+        },
+
+        {
+          rel: "preconnect",
+          href: "https://fonts.googleapis.com",
+        },
+
+        {
+          rel: "preconnect",
+          href: "https://fonts.gstatic.com",
+          crossOrigin: "anonymous",
+        },
+
+        {
+          rel: "stylesheet",
+          href:
+            "https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&display=swap",
+        },
+
+        {
+          rel: "icon",
+          href: "/school.png",
+          type: "image/png",
+        },
+      ],
+    }),
+
+    shellComponent: RootShell,
+    component: RootComponent,
+
+    notFoundComponent:
+      NotFoundComponent,
+
+    errorComponent:
+      ErrorComponent,
+  });
+
+// ==========================================
+// ROOT SHELL
+// ==========================================
+
+function RootShell({
+  children,
+}: {
+  children: ReactNode;
+}) {
   return (
-    <html lang="en">
+    <html lang="bn">
       <head>
         <HeadContent />
       </head>
+
       <body>
         {children}
+
         <Scripts />
       </body>
     </html>
   );
 }
 
+// ==========================================
+// ROOT COMPONENT
+// ==========================================
+
 function RootComponent() {
-  const { queryClient } = Route.useRouteContext();
+  const { queryClient } =
+    Route.useRouteContext();
 
   return (
     <QueryClientProvider client={queryClient}>
-      {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
+      {/* All Routes */}
+
       <Outlet />
+
+      {/* ======================================
+          GLOBAL TOASTER
+      ====================================== */}
+
+      <Toaster
+        position="top-right"
+        reverseOrder={false}
+        gutter={10}
+        toastOptions={{
+          duration: 3000,
+
+          style: {
+            borderRadius: "14px",
+            background: "#0f172a",
+            color: "#ffffff",
+            padding: "14px 18px",
+            fontSize: "14px",
+            fontWeight: "500",
+            boxShadow:
+              "0 10px 30px rgba(15, 23, 42, 0.18)",
+          },
+
+          success: {
+            duration: 2500,
+
+            iconTheme: {
+              primary: "#10b981",
+              secondary: "#ffffff",
+            },
+          },
+
+          error: {
+            duration: 3500,
+
+            iconTheme: {
+              primary: "#ef4444",
+              secondary: "#ffffff",
+            },
+          },
+
+          loading: {
+            duration: Infinity,
+          },
+        }}
+      />
     </QueryClientProvider>
   );
 }
