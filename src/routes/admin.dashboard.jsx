@@ -351,6 +351,25 @@ function AdminDashboard() {
               রুটিন পরিচালনা
             </Link>
           </div>
+
+          {/* Notice Management */}
+
+          <div className="rounded-2xl bg-white p-6 shadow-sm">
+            <h3 className="text-xl font-bold text-slate-900">
+              নোটিশ ব্যবস্থাপনা
+            </h3>
+
+            <p className="mt-2 text-sm leading-6 text-slate-500">
+              বিদ্যালয়ের নোটিশ যোগ, সম্পাদনা এবং মুছে ফেলুন।
+            </p>
+
+            <Link
+              to="/admin/notices"
+              className="mt-5 inline-block rounded-xl bg-teal-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-teal-700"
+            >
+              নোটিশ পরিচালনা
+            </Link>
+          </div>
         </div>
       </main>
     </div>
