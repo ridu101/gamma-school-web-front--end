@@ -12,7 +12,10 @@ export const Route = createFileRoute("/admin/dashboard")({
   component: AdminDashboard,
 });
 
-// English number → Bangla number
+// ==========================================
+// ENGLISH NUMBER → BANGLA NUMBER
+// ==========================================
+
 const toBanglaNumber = (number) => {
   const banglaDigits = [
     "০",
@@ -32,6 +35,10 @@ const toBanglaNumber = (number) => {
     (digit) => banglaDigits[digit]
   );
 };
+
+// ==========================================
+// ADMIN DASHBOARD
+// ==========================================
 
 function AdminDashboard() {
   const navigate = useNavigate();
@@ -149,17 +156,32 @@ function AdminDashboard() {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-slate-50">
-        <div className="flex flex-col items-center gap-4">
-          <div className="h-10 w-10 animate-spin rounded-full border-4 border-teal-100 border-t-teal-500" />
+      <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[#dfe6eb]">
+        <div
+          className="pointer-events-none absolute inset-0"
+          style={{
+            backgroundImage: `
+              linear-gradient(rgba(13,148,136,0.08) 1px, transparent 1px),
+              linear-gradient(90deg, rgba(13,148,136,0.08) 1px, transparent 1px)
+            `,
+            backgroundSize: "40px 40px",
+          }}
+        />
 
-          <p className="text-sm font-medium text-slate-500">
+        <div className="relative z-10 flex flex-col items-center gap-4">
+          <div className="h-11 w-11 animate-spin rounded-full border-4 border-teal-100 border-t-teal-600" />
+
+          <p className="text-sm font-semibold text-slate-600">
             ড্যাশবোর্ড লোড হচ্ছে...
           </p>
         </div>
       </div>
     );
   }
+
+  // ==========================================
+  // STAT CARDS
+  // ==========================================
 
   const statCards = [
     {
@@ -187,6 +209,10 @@ function AdminDashboard() {
       accent: "orange",
     },
   ];
+
+  // ==========================================
+  // MANAGEMENT CARDS
+  // ==========================================
 
   const managementCards = [
     {
@@ -236,76 +262,70 @@ function AdminDashboard() {
     },
   ];
 
+  // ==========================================
+  // UI
+  // ==========================================
+
   return (
-    <div className="relative min-h-screen overflow-hidden bg-slate-50">
+    <div className="relative min-h-screen overflow-hidden bg-[#dfe6eb]">
       {/* ==========================================
           BACKGROUND
       ========================================== */}
 
-      <div className="pointer-events-none absolute inset-0">
-        <div className="absolute -left-32 -top-32 h-80 w-80 rounded-full bg-cyan-200/40 blur-3xl" />
-
-        <div className="absolute -right-24 top-52 h-80 w-80 rounded-full bg-teal-200/30 blur-3xl" />
-
-        <div className="absolute bottom-0 left-1/3 h-72 w-72 rounded-full bg-blue-100/50 blur-3xl" />
-      </div>
-
       <div
-        className="pointer-events-none absolute inset-0 opacity-[0.35]"
+        className="pointer-events-none absolute inset-0"
         style={{
-          backgroundImage:
-            "linear-gradient(rgba(15,118,110,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(15,118,110,0.05) 1px, transparent 1px)",
-          backgroundSize: "34px 34px",
+          backgroundColor: "#dfe6eb",
+          backgroundImage: `
+            linear-gradient(rgba(13,148,136,0.08) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(13,148,136,0.08) 1px, transparent 1px),
+            linear-gradient(rgba(15,23,42,0.025) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(15,23,42,0.025) 1px, transparent 1px)
+          `,
+          backgroundSize:
+            "40px 40px, 40px 40px, 200px 200px, 200px 200px",
         }}
       />
+
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-72 bg-gradient-to-b from-teal-200/35 via-cyan-100/20 to-transparent" />
+
+      <div className="pointer-events-none absolute left-1/2 top-0 h-px w-[90%] -translate-x-1/2 bg-gradient-to-r from-transparent via-teal-400/70 to-transparent" />
 
       {/* ==========================================
           HEADER
       ========================================== */}
 
-      <header className="relative z-20 border-b border-slate-200/80 bg-white/85 backdrop-blur-xl">
-        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-4 sm:px-6 lg:px-8">
-          <div className="flex min-w-0 items-center gap-3">
-            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-cyan-500 to-teal-500 text-white shadow-lg shadow-teal-100">
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                className="h-6 w-6"
-              >
-                <path
-                  d="M3 9.5 12 5l9 4.5-9 4.5-9-4.5Z"
-                  stroke="currentColor"
-                  strokeWidth="1.8"
-                  strokeLinejoin="round"
-                />
+      <header className="relative z-20 border-b border-slate-300/80 bg-white/90 shadow-[0_5px_20px_rgba(15,23,42,0.06)] backdrop-blur-2xl">
+        <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-4 sm:px-6 lg:px-8">
+          {/* Left */}
 
-                <path
-                  d="M7 12v4.2c0 .8 2.2 2.8 5 2.8s5-2 5-2.8V12"
-                  stroke="currentColor"
-                  strokeWidth="1.8"
-                  strokeLinecap="round"
-                />
-              </svg>
+          <div className="flex min-w-0 items-center gap-3">
+            <div className="relative flex h-12 w-12 shrink-0 items-center justify-center">
+              <div className="absolute inset-0 rounded-[17px] bg-gradient-to-br from-cyan-500 via-teal-500 to-emerald-600 shadow-lg shadow-teal-300/50" />
+
+              <SchoolIcon className="relative z-10 h-6 w-6 text-white" />
             </div>
 
             <div className="min-w-0">
-              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-teal-600">
-                Admin Portal
+              <p className="text-[10px] font-extrabold uppercase tracking-[0.22em] text-teal-700 sm:text-xs">
+                Admin Control Center
               </p>
 
-              <h1 className="truncate text-lg font-bold text-slate-900 sm:text-xl">
+              <h1 className="truncate text-lg font-extrabold text-slate-900 sm:text-xl">
                 ডিজিটাল বিদ্যালয়
               </h1>
             </div>
           </div>
 
+          {/* Right */}
+
           <div className="flex items-center gap-2 sm:gap-4">
             <div className="hidden text-right sm:block">
-              <p className="max-w-[180px] truncate text-sm font-semibold text-slate-800">
+              <p className="max-w-[190px] truncate text-sm font-bold text-slate-800">
                 {admin?.name}
               </p>
 
-              <p className="max-w-[180px] truncate text-xs text-slate-500">
+              <p className="max-w-[210px] truncate text-xs text-slate-500">
                 {admin?.email}
               </p>
             </div>
@@ -313,34 +333,15 @@ function AdminDashboard() {
             <button
               type="button"
               onClick={handleLogout}
-              className="inline-flex items-center gap-2 rounded-xl border border-red-100 bg-red-50 px-3 py-2.5 text-sm font-semibold text-red-600 transition hover:border-red-200 hover:bg-red-100 sm:px-4"
+              className="group inline-flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 px-3 py-2.5 text-sm font-bold text-red-600 shadow-sm transition duration-300 hover:-translate-y-0.5 hover:border-red-300 hover:bg-red-100 hover:shadow-md sm:px-4"
             >
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                className="h-4 w-4"
-              >
-                <path
-                  d="M10 5H6a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h4"
-                  stroke="currentColor"
-                  strokeWidth="1.8"
-                  strokeLinecap="round"
-                />
+              <LogoutIcon className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
 
-                <path
-                  d="M14 8l4 4-4 4M18 12H9"
-                  stroke="currentColor"
-                  strokeWidth="1.8"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-
-              <span className="hidden xs:inline">
+              <span className="hidden sm:inline">
                 লগআউট
               </span>
 
-              <span className="xs:hidden">
+              <span className="sm:hidden">
                 বের হন
               </span>
             </button>
@@ -349,92 +350,101 @@ function AdminDashboard() {
       </header>
 
       {/* ==========================================
-          CONTENT
+          MAIN CONTENT
       ========================================== */}
 
-      <main className="relative z-10 mx-auto max-w-7xl px-4 py-7 sm:px-6 sm:py-10 lg:px-8">
-        {/* Welcome Hero */}
-        <section className="relative overflow-hidden rounded-[28px] border border-white bg-white/80 p-5 shadow-xl shadow-slate-200/50 backdrop-blur-xl sm:p-7 lg:p-8">
-          <div className="pointer-events-none absolute right-0 top-0 h-40 w-40 rounded-full bg-cyan-100/70 blur-3xl" />
+      <main className="relative z-10 mx-auto max-w-7xl px-4 py-5 sm:px-6 sm:py-7 lg:px-8">
+        {/* ==========================================
+            HERO
+        ========================================== */}
 
-          <div className="pointer-events-none absolute bottom-0 left-1/3 h-32 w-32 rounded-full bg-teal-100/60 blur-3xl" />
+        <section className="relative overflow-hidden rounded-[30px] border border-slate-300/80 bg-white/95 shadow-[0_18px_50px_rgba(15,23,42,0.12)] backdrop-blur-2xl">
+          <div className="h-1.5 w-full bg-gradient-to-r from-cyan-500 via-teal-500 to-emerald-500" />
 
-          <div className="relative flex flex-col justify-between gap-6 lg:flex-row lg:items-center">
-            <div>
-              <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-teal-100 bg-teal-50 px-3 py-1.5 text-xs font-semibold text-teal-700">
-                <span className="h-2 w-2 rounded-full bg-teal-500" />
-                Dashboard Overview
-              </div>
+          <div className="relative p-5 sm:p-7 lg:p-8">
+            {/* Decorative circles */}
 
-              <h2 className="text-2xl font-bold leading-tight text-slate-900 sm:text-3xl lg:text-4xl">
-                স্বাগতম,{" "}
-                <span className="bg-gradient-to-r from-teal-600 to-cyan-600 bg-clip-text text-transparent">
-                  {admin?.name}
+            <div className="pointer-events-none absolute -right-8 -top-8 h-44 w-44 rounded-full border border-teal-100/80" />
+
+            <div className="pointer-events-none absolute right-5 top-5 h-28 w-28 rounded-full border border-teal-100/70" />
+
+            <div className="pointer-events-none absolute right-12 top-12 h-16 w-16 rounded-full border border-teal-100/60" />
+
+            <div className="relative flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+              {/* Hero text */}
+
+              <div className="max-w-3xl">
+                <span className="inline-flex items-center gap-2 rounded-full border border-teal-200 bg-teal-50 px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.14em] text-teal-700">
+                  <span className="h-2 w-2 rounded-full bg-emerald-500 shadow-[0_0_0_4px_rgba(16,185,129,0.12)]" />
+
+                  Dashboard Overview
                 </span>
-              </h2>
 
-              <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-500 sm:text-base">
-                এখান থেকে বিদ্যালয়ের শিক্ষক, শিক্ষার্থী,
-                ফলাফল, রুটিন ও নোটিশ সহজেই পরিচালনা করতে
-                পারবেন।
-              </p>
-            </div>
+                <h2 className="mt-4 text-2xl font-extrabold leading-tight text-slate-900 sm:text-3xl lg:text-4xl">
+                  স্বাগতম,{" "}
+                  <span className="bg-gradient-to-r from-cyan-600 via-teal-600 to-emerald-600 bg-clip-text text-transparent">
+                    {admin?.name}
+                  </span>
+                </h2>
 
-            <div className="flex shrink-0 items-center gap-3 rounded-2xl border border-slate-100 bg-white/80 px-4 py-3 shadow-sm">
-              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-teal-50 text-teal-600">
-                <svg
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  className="h-5 w-5"
-                >
-                  <path
-                    d="M12 3 5 6v5c0 4.5 3 8 7 10 4-2 7-5.5 7-10V6l-7-3Z"
-                    stroke="currentColor"
-                    strokeWidth="1.7"
-                    strokeLinejoin="round"
-                  />
-
-                  <path
-                    d="m9 12 2 2 4-4"
-                    stroke="currentColor"
-                    strokeWidth="1.7"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
+                <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-600 sm:text-base">
+                  এখান থেকে বিদ্যালয়ের শিক্ষক, শিক্ষার্থী,
+                  ফলাফল, রুটিন এবং নোটিশ এক জায়গা থেকে
+                  সহজে পরিচালনা করতে পারবেন।
+                </p>
               </div>
 
-              <div>
-                <p className="text-xs text-slate-400">
-                  System Status
-                </p>
+              {/* Status */}
 
-                <p className="text-sm font-semibold text-emerald-600">
-                  ● Online & Secure
-                </p>
+              <div className="w-full shrink-0 rounded-[22px] border border-teal-200/80 bg-gradient-to-br from-white to-teal-50/80 p-4 shadow-sm lg:w-auto lg:min-w-[220px]">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-teal-100 bg-white text-teal-700 shadow-sm">
+                    <ShieldIcon className="h-6 w-6" />
+                  </div>
+
+                  <div>
+                    <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-slate-400">
+                      System Status
+                    </p>
+
+                    <p className="mt-1 flex items-center gap-2 text-sm font-extrabold text-emerald-600">
+                      <span className="relative flex h-2.5 w-2.5">
+                        <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-50" />
+
+                        <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-emerald-500" />
+                      </span>
+
+                      Online & Secure
+                    </p>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
         </section>
 
         {/* ==========================================
-            STATS
+            STATS SECTION
         ========================================== */}
 
         <section className="mt-7">
           <div className="mb-4 flex items-end justify-between">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-teal-600">
+              <p className="text-[11px] font-extrabold uppercase tracking-[0.2em] text-teal-700">
                 Overview
               </p>
 
-              <h3 className="mt-1 text-xl font-bold text-slate-900">
+              <h3 className="mt-1 text-xl font-extrabold text-slate-900 sm:text-2xl">
                 বিদ্যালয়ের সারসংক্ষেপ
               </h3>
+
+              <p className="mt-1 text-sm text-slate-500">
+                বর্তমান সিস্টেমের গুরুত্বপূর্ণ তথ্য
+              </p>
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-4">
+          <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
             {statCards.map((item) => (
               <StatCard
                 key={item.label}
@@ -446,16 +456,16 @@ function AdminDashboard() {
         </section>
 
         {/* ==========================================
-            MANAGEMENT
+            MANAGEMENT SECTION
         ========================================== */}
 
-        <section className="mt-9">
+        <section className="mt-8">
           <div className="mb-5">
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-teal-600">
+            <p className="text-[11px] font-extrabold uppercase tracking-[0.2em] text-teal-700">
               Management
             </p>
 
-            <h3 className="mt-1 text-xl font-bold text-slate-900 sm:text-2xl">
+            <h3 className="mt-1 text-xl font-extrabold text-slate-900 sm:text-2xl">
               ব্যবস্থাপনা বিভাগ
             </h3>
 
@@ -474,16 +484,19 @@ function AdminDashboard() {
           </div>
         </section>
 
-        {/* Footer */}
-        <div className="mt-10 border-t border-slate-200/80 pt-6 text-center">
-          <p className="text-xs text-slate-400">
+        {/* ==========================================
+            FOOTER
+        ========================================== */}
+
+        <footer className="mt-10 border-t border-slate-300/80 py-6 text-center">
+          <p className="text-xs font-semibold text-slate-500">
             Digital School Administration System
           </p>
 
           <p className="mt-1 text-[11px] text-slate-400">
-            Secure • Responsive • Centralized Management
+            Secure • Responsive • Centralized
           </p>
-        </div>
+        </footer>
       </main>
     </div>
   );
@@ -501,41 +514,59 @@ function StatCard({
 }) {
   const styles = {
     blue: {
-      icon: "bg-blue-50 text-blue-600",
-      number: "text-blue-600",
-      glow: "bg-blue-100/70",
+      icon:
+        "border-blue-100 bg-blue-50 text-blue-700",
+      number: "text-blue-700",
+      line: "from-blue-500 to-cyan-500",
+      badge:
+        "bg-blue-50 text-blue-600 border-blue-100",
+      hover: "hover:border-blue-300",
     },
 
     emerald: {
-      icon: "bg-emerald-50 text-emerald-600",
-      number: "text-emerald-600",
-      glow: "bg-emerald-100/70",
+      icon:
+        "border-emerald-100 bg-emerald-50 text-emerald-700",
+      number: "text-emerald-700",
+      line: "from-emerald-500 to-teal-500",
+      badge:
+        "bg-emerald-50 text-emerald-600 border-emerald-100",
+      hover: "hover:border-emerald-300",
     },
 
     violet: {
-      icon: "bg-violet-50 text-violet-600",
-      number: "text-violet-600",
-      glow: "bg-violet-100/70",
+      icon:
+        "border-violet-100 bg-violet-50 text-violet-700",
+      number: "text-violet-700",
+      line: "from-violet-500 to-fuchsia-500",
+      badge:
+        "bg-violet-50 text-violet-600 border-violet-100",
+      hover: "hover:border-violet-300",
     },
 
     orange: {
-      icon: "bg-orange-50 text-orange-600",
-      number: "text-orange-600",
-      glow: "bg-orange-100/70",
+      icon:
+        "border-orange-100 bg-orange-50 text-orange-700",
+      number: "text-orange-700",
+      line: "from-orange-500 to-amber-500",
+      badge:
+        "bg-orange-50 text-orange-600 border-orange-100",
+      hover: "hover:border-orange-300",
     },
   };
 
   const current = styles[accent];
 
   return (
-    <div className="group relative overflow-hidden rounded-2xl border border-slate-200/80 bg-white p-4 shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-slate-200/60 sm:rounded-3xl sm:p-5">
+    <article
+      className={`group relative overflow-hidden rounded-[24px] border border-slate-300/80 bg-white/95 p-4 shadow-[0_10px_30px_rgba(15,23,42,0.08)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_18px_42px_rgba(15,23,42,0.14)] sm:p-5 ${current.hover}`}
+    >
       <div
-        className={`pointer-events-none absolute -right-8 -top-8 h-24 w-24 rounded-full blur-2xl ${current.glow}`}
+        className={`absolute inset-x-0 top-0 h-1 bg-gradient-to-r ${current.line}`}
       />
 
-      <div className="relative">
+      <div className="flex items-start justify-between gap-3">
         <div
-          className={`flex h-10 w-10 items-center justify-center rounded-xl sm:h-11 sm:w-11 ${current.icon}`}
+          className={`flex h-11 w-11 items-center justify-center rounded-2xl border ${current.icon}`}
         >
           <DashboardIcon
             name={icon}
@@ -543,17 +574,25 @@ function StatCard({
           />
         </div>
 
-        <p className="mt-4 text-xs font-medium text-slate-500 sm:text-sm">
+        <span
+          className={`rounded-full border px-2.5 py-1 text-[9px] font-extrabold uppercase tracking-[0.12em] ${current.badge}`}
+        >
+          Total
+        </span>
+      </div>
+
+      <div className="mt-4">
+        <p className="text-xs font-bold text-slate-500 sm:text-sm">
           {label}
         </p>
 
         <h4
-          className={`mt-1 text-2xl font-bold sm:text-3xl ${current.number}`}
+          className={`mt-1 text-2xl font-black sm:text-3xl ${current.number}`}
         >
           {value}
         </h4>
       </div>
-    </div>
+    </article>
   );
 }
 
@@ -571,85 +610,215 @@ function ManagementCard({
 }) {
   const styles = {
     blue: {
-      icon: "bg-blue-50 text-blue-600",
+      icon:
+        "border-blue-100 bg-blue-50 text-blue-700",
       button:
-        "bg-blue-600 hover:bg-blue-700 shadow-blue-100",
-      border: "hover:border-blue-200",
+        "from-blue-600 to-cyan-600 shadow-blue-200/80",
+      border: "hover:border-blue-300",
+      small:
+        "border-blue-100 bg-blue-50 text-blue-600",
     },
 
     emerald: {
-      icon: "bg-emerald-50 text-emerald-600",
+      icon:
+        "border-emerald-100 bg-emerald-50 text-emerald-700",
       button:
-        "bg-emerald-600 hover:bg-emerald-700 shadow-emerald-100",
-      border: "hover:border-emerald-200",
+        "from-emerald-600 to-teal-600 shadow-emerald-200/80",
+      border: "hover:border-emerald-300",
+      small:
+        "border-emerald-100 bg-emerald-50 text-emerald-600",
     },
 
     violet: {
-      icon: "bg-violet-50 text-violet-600",
+      icon:
+        "border-violet-100 bg-violet-50 text-violet-700",
       button:
-        "bg-violet-600 hover:bg-violet-700 shadow-violet-100",
-      border: "hover:border-violet-200",
+        "from-violet-600 to-fuchsia-600 shadow-violet-200/80",
+      border: "hover:border-violet-300",
+      small:
+        "border-violet-100 bg-violet-50 text-violet-600",
     },
 
     orange: {
-      icon: "bg-orange-50 text-orange-600",
+      icon:
+        "border-orange-100 bg-orange-50 text-orange-700",
       button:
-        "bg-orange-500 hover:bg-orange-600 shadow-orange-100",
-      border: "hover:border-orange-200",
+        "from-orange-500 to-amber-500 shadow-orange-200/80",
+      border: "hover:border-orange-300",
+      small:
+        "border-orange-100 bg-orange-50 text-orange-600",
     },
 
     teal: {
-      icon: "bg-teal-50 text-teal-600",
+      icon:
+        "border-teal-100 bg-teal-50 text-teal-700",
       button:
-        "bg-teal-600 hover:bg-teal-700 shadow-teal-100",
-      border: "hover:border-teal-200",
+        "from-cyan-600 to-teal-600 shadow-teal-200/80",
+      border: "hover:border-teal-300",
+      small:
+        "border-teal-100 bg-teal-50 text-teal-600",
     },
   };
 
   const current = styles[accent];
 
   return (
-    <div
-      className={`group flex h-full flex-col rounded-3xl border border-slate-200/80 bg-white p-5 shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-slate-200/60 sm:p-6 ${current.border}`}
+    <article
+      className={`group relative flex h-full flex-col overflow-hidden rounded-[26px] border border-slate-300/80 bg-white/95 p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_20px_45px_rgba(15,23,42,0.14)] sm:p-6 ${current.border}`}
     >
-      <div
-        className={`flex h-12 w-12 items-center justify-center rounded-2xl ${current.icon}`}
-      >
-        <DashboardIcon
-          name={icon}
-          className="h-6 w-6"
-        />
+      <div className="absolute right-0 top-0 h-24 w-24 rounded-bl-[80px] bg-slate-50/80" />
+
+      <div className="relative flex items-start justify-between">
+        <div
+          className={`flex h-12 w-12 items-center justify-center rounded-2xl border ${current.icon}`}
+        >
+          <DashboardIcon
+            name={icon}
+            className="h-6 w-6"
+          />
+        </div>
+
+        <span
+          className={`rounded-full border px-2.5 py-1 text-[9px] font-extrabold uppercase tracking-[0.12em] ${current.small}`}
+        >
+          Manage
+        </span>
       </div>
 
-      <h4 className="mt-5 text-lg font-bold text-slate-900 sm:text-xl">
-        {title}
-      </h4>
+      <div className="relative mt-5 flex flex-1 flex-col">
+        <h4 className="text-lg font-extrabold text-slate-900 sm:text-xl">
+          {title}
+        </h4>
 
-      <p className="mt-2 flex-1 text-sm leading-6 text-slate-500">
-        {description}
-      </p>
+        <p className="mt-2 flex-1 text-sm leading-6 text-slate-600">
+          {description}
+        </p>
 
-      <Link
-        to={to}
-        className={`mt-5 inline-flex w-full items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-semibold text-white shadow-lg transition duration-300 hover:-translate-y-0.5 sm:w-fit ${current.button}`}
-      >
-        {buttonText}
-
-        <svg
-          viewBox="0 0 24 24"
-          fill="none"
-          className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1"
+        <Link
+          to={to}
+          className={`mt-5 inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r px-4 py-3 text-sm font-bold text-white shadow-lg transition duration-300 hover:-translate-y-0.5 hover:shadow-xl sm:w-fit ${current.button}`}
         >
-          <path
-            d="M5 12h14M14 7l5 5-5 5"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
-      </Link>
-    </div>
+          {buttonText}
+
+          <ArrowIcon className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
+        </Link>
+      </div>
+    </article>
+  );
+}
+
+// ==========================================
+// SCHOOL ICON
+// ==========================================
+
+function SchoolIcon({ className = "" }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      className={className}
+    >
+      <path
+        d="M3 9.5 12 5l9 4.5-9 4.5-9-4.5Z"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinejoin="round"
+      />
+
+      <path
+        d="M7 12v4.2c0 .8 2.2 2.8 5 2.8s5-2 5-2.8V12"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+      />
+
+      <path
+        d="M21 9.5V15"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
+// ==========================================
+// LOGOUT ICON
+// ==========================================
+
+function LogoutIcon({ className = "" }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      className={className}
+    >
+      <path
+        d="M10 5H6a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h4"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+      />
+
+      <path
+        d="M14 8l4 4-4 4M18 12H9"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+// ==========================================
+// SHIELD ICON
+// ==========================================
+
+function ShieldIcon({ className = "" }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      className={className}
+    >
+      <path
+        d="M12 3 5 6v5c0 4.5 3 8 7 10 4-2 7-5.5 7-10V6l-7-3Z"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinejoin="round"
+      />
+
+      <path
+        d="m9 12 2 2 4-4"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+// ==========================================
+// ARROW ICON
+// ==========================================
+
+function ArrowIcon({ className = "" }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      className={className}
+    >
+      <path
+        d="M5 12h14M14 7l5 5-5 5"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
   );
 }
 
@@ -661,6 +830,7 @@ function DashboardIcon({
   name,
   className = "",
 }) {
+  // Teacher
   if (name === "teacher") {
     return (
       <svg
@@ -693,6 +863,7 @@ function DashboardIcon({
     );
   }
 
+  // Student
   if (name === "student") {
     return (
       <svg
@@ -717,6 +888,7 @@ function DashboardIcon({
     );
   }
 
+  // Result
   if (name === "result") {
     return (
       <svg
@@ -741,6 +913,7 @@ function DashboardIcon({
     );
   }
 
+  // Routine
   if (name === "routine") {
     return (
       <svg
@@ -768,6 +941,7 @@ function DashboardIcon({
     );
   }
 
+  // Notice
   if (name === "notice") {
     return (
       <svg
