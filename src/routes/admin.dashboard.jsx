@@ -43,24 +43,34 @@ const toBanglaNumber = (number) => {
 function AdminDashboard() {
   const navigate = useNavigate();
 
-  const [admin, setAdmin] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [admin, setAdmin] =
+    useState(null);
+
+  const [loading, setLoading] =
+    useState(true);
+
+  // ==========================================
+  // DASHBOARD STATS
+  // ==========================================
 
   const [stats, setStats] = useState({
     teachers: 0,
     students: 0,
     results: 0,
     routines: 0,
+    notices: 0,
   });
 
   // ==========================================
-  // CHECK AUTH + LOAD DASHBOARD STATS
+  // AUTH + LOAD DASHBOARD STATS
   // ==========================================
 
   useEffect(() => {
     async function checkAuth() {
       const token =
-        window.localStorage.getItem("admin_token");
+        window.localStorage.getItem(
+          "admin_token"
+        );
 
       if (!token) {
         navigate({
@@ -72,27 +82,39 @@ function AdminDashboard() {
       }
 
       try {
+        // Admin verify
         const response =
           await apiRequest("/auth/me");
 
         setAdmin(response.data);
 
+        // Dashboard stats
         try {
           const statsResponse =
-            await apiRequest("/dashboard/stats");
+            await apiRequest(
+              "/dashboard/stats"
+            );
 
           setStats({
             teachers:
-              statsResponse.data?.teachers ?? 0,
+              statsResponse.data
+                ?.teachers ?? 0,
 
             students:
-              statsResponse.data?.students ?? 0,
+              statsResponse.data
+                ?.students ?? 0,
 
             results:
-              statsResponse.data?.results ?? 0,
+              statsResponse.data
+                ?.results ?? 0,
 
             routines:
-              statsResponse.data?.routines ?? 0,
+              statsResponse.data
+                ?.routines ?? 0,
+
+            notices:
+              statsResponse.data
+                ?.notices ?? 0,
           });
         } catch (statsError) {
           console.error(
@@ -101,7 +123,10 @@ function AdminDashboard() {
           );
         }
       } catch (error) {
-        console.error("Auth error:", error);
+        console.error(
+          "Auth error:",
+          error
+        );
 
         window.localStorage.removeItem(
           "admin_token"
@@ -129,11 +154,17 @@ function AdminDashboard() {
 
   const handleLogout = async () => {
     try {
-      await apiRequest("/auth/logout", {
-        method: "POST",
-      });
+      await apiRequest(
+        "/auth/logout",
+        {
+          method: "POST",
+        }
+      );
     } catch (error) {
-      console.error("Logout error:", error);
+      console.error(
+        "Logout error:",
+        error
+      );
     } finally {
       window.localStorage.removeItem(
         "admin_token"
@@ -164,7 +195,8 @@ function AdminDashboard() {
               linear-gradient(rgba(13,148,136,0.08) 1px, transparent 1px),
               linear-gradient(90deg, rgba(13,148,136,0.08) 1px, transparent 1px)
             `,
-            backgroundSize: "40px 40px",
+            backgroundSize:
+              "40px 40px",
           }}
         />
 
@@ -190,23 +222,33 @@ function AdminDashboard() {
       icon: "teacher",
       accent: "blue",
     },
+
     {
       label: "শিক্ষার্থী",
       value: stats.students,
       icon: "student",
       accent: "emerald",
     },
+
     {
       label: "ফলাফল",
       value: stats.results,
       icon: "result",
       accent: "violet",
     },
+
     {
       label: "রুটিন",
       value: stats.routines,
       icon: "routine",
       accent: "orange",
+    },
+
+    {
+      label: "নোটিশ",
+      value: stats.notices,
+      icon: "notice",
+      accent: "teal",
     },
   ];
 
@@ -217,47 +259,85 @@ function AdminDashboard() {
   const managementCards = [
     {
       title: "শিক্ষক ব্যবস্থাপনা",
+
       description:
         "শিক্ষক যোগ, সম্পাদনা এবং মুছে ফেলুন।",
+
       to: "/admin/teachers",
-      buttonText: "শিক্ষক পরিচালনা",
+
+      buttonText:
+        "শিক্ষক পরিচালনা",
+
       accent: "blue",
+
       icon: "teacher",
     },
+
     {
-      title: "শিক্ষার্থী ব্যবস্থাপনা",
+      title:
+        "শিক্ষার্থী ব্যবস্থাপনা",
+
       description:
         "শিক্ষার্থী যোগ, সম্পাদনা এবং মুছে ফেলুন।",
+
       to: "/admin/students",
-      buttonText: "শিক্ষার্থী পরিচালনা",
+
+      buttonText:
+        "শিক্ষার্থী পরিচালনা",
+
       accent: "emerald",
+
       icon: "student",
     },
+
     {
-      title: "ফলাফল ব্যবস্থাপনা",
+      title:
+        "ফলাফল ব্যবস্থাপনা",
+
       description:
         "শিক্ষার্থীদের ফলাফল যোগ, সম্পাদনা এবং মুছে ফেলুন।",
+
       to: "/admin/results",
-      buttonText: "ফলাফল পরিচালনা",
+
+      buttonText:
+        "ফলাফল পরিচালনা",
+
       accent: "violet",
+
       icon: "result",
     },
+
     {
-      title: "রুটিন ব্যবস্থাপনা",
+      title:
+        "রুটিন ব্যবস্থাপনা",
+
       description:
         "শ্রেণির রুটিন যোগ, সম্পাদনা এবং মুছে ফেলুন।",
+
       to: "/admin/routines",
-      buttonText: "রুটিন পরিচালনা",
+
+      buttonText:
+        "রুটিন পরিচালনা",
+
       accent: "orange",
+
       icon: "routine",
     },
+
     {
-      title: "নোটিশ ব্যবস্থাপনা",
+      title:
+        "নোটিশ ব্যবস্থাপনা",
+
       description:
         "বিদ্যালয়ের নোটিশ যোগ, সম্পাদনা এবং মুছে ফেলুন।",
+
       to: "/admin/notices",
-      buttonText: "নোটিশ পরিচালনা",
+
+      buttonText:
+        "নোটিশ পরিচালনা",
+
       accent: "teal",
+
       icon: "notice",
     },
   ];
@@ -275,13 +355,16 @@ function AdminDashboard() {
       <div
         className="pointer-events-none absolute inset-0"
         style={{
-          backgroundColor: "#dfe6eb",
+          backgroundColor:
+            "#dfe6eb",
+
           backgroundImage: `
             linear-gradient(rgba(13,148,136,0.08) 1px, transparent 1px),
             linear-gradient(90deg, rgba(13,148,136,0.08) 1px, transparent 1px),
             linear-gradient(rgba(15,23,42,0.025) 1px, transparent 1px),
             linear-gradient(90deg, rgba(15,23,42,0.025) 1px, transparent 1px)
           `,
+
           backgroundSize:
             "40px 40px, 40px 40px, 200px 200px, 200px 200px",
         }}
@@ -297,7 +380,7 @@ function AdminDashboard() {
 
       <header className="relative z-20 border-b border-slate-300/80 bg-white/90 shadow-[0_5px_20px_rgba(15,23,42,0.06)] backdrop-blur-2xl">
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-4 sm:px-6 lg:px-8">
-          {/* Left */}
+          {/* LEFT */}
 
           <div className="flex min-w-0 items-center gap-3">
             <div className="relative flex h-12 w-12 shrink-0 items-center justify-center">
@@ -317,7 +400,7 @@ function AdminDashboard() {
             </div>
           </div>
 
-          {/* Right */}
+          {/* RIGHT */}
 
           <div className="flex items-center gap-2 sm:gap-4">
             <div className="hidden text-right sm:block">
@@ -350,7 +433,7 @@ function AdminDashboard() {
       </header>
 
       {/* ==========================================
-          MAIN CONTENT
+          MAIN
       ========================================== */}
 
       <main className="relative z-10 mx-auto max-w-7xl px-4 py-5 sm:px-6 sm:py-7 lg:px-8">
@@ -362,7 +445,7 @@ function AdminDashboard() {
           <div className="h-1.5 w-full bg-gradient-to-r from-cyan-500 via-teal-500 to-emerald-500" />
 
           <div className="relative p-5 sm:p-7 lg:p-8">
-            {/* Decorative circles */}
+            {/* Decorative Circles */}
 
             <div className="pointer-events-none absolute -right-8 -top-8 h-44 w-44 rounded-full border border-teal-100/80" />
 
@@ -371,7 +454,7 @@ function AdminDashboard() {
             <div className="pointer-events-none absolute right-12 top-12 h-16 w-16 rounded-full border border-teal-100/60" />
 
             <div className="relative flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
-              {/* Hero text */}
+              {/* Welcome */}
 
               <div className="max-w-3xl">
                 <span className="inline-flex items-center gap-2 rounded-full border border-teal-200 bg-teal-50 px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.14em] text-teal-700">
@@ -388,13 +471,16 @@ function AdminDashboard() {
                 </h2>
 
                 <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-600 sm:text-base">
-                  এখান থেকে বিদ্যালয়ের শিক্ষক, শিক্ষার্থী,
-                  ফলাফল, রুটিন এবং নোটিশ এক জায়গা থেকে
-                  সহজে পরিচালনা করতে পারবেন।
+                  এখান থেকে বিদ্যালয়ের
+                  শিক্ষক, শিক্ষার্থী,
+                  ফলাফল, রুটিন এবং
+                  নোটিশ এক জায়গা থেকে
+                  সহজে পরিচালনা করতে
+                  পারবেন।
                 </p>
               </div>
 
-              {/* Status */}
+              {/* System Status */}
 
               <div className="w-full shrink-0 rounded-[22px] border border-teal-200/80 bg-gradient-to-br from-white to-teal-50/80 p-4 shadow-sm lg:w-auto lg:min-w-[220px]">
                 <div className="flex items-center gap-3">
@@ -424,39 +510,41 @@ function AdminDashboard() {
         </section>
 
         {/* ==========================================
-            STATS SECTION
+            STATS
         ========================================== */}
 
         <section className="mt-7">
-          <div className="mb-4 flex items-end justify-between">
-            <div>
-              <p className="text-[11px] font-extrabold uppercase tracking-[0.2em] text-teal-700">
-                Overview
-              </p>
+          <div className="mb-4">
+            <p className="text-[11px] font-extrabold uppercase tracking-[0.2em] text-teal-700">
+              Overview
+            </p>
 
-              <h3 className="mt-1 text-xl font-extrabold text-slate-900 sm:text-2xl">
-                বিদ্যালয়ের সারসংক্ষেপ
-              </h3>
+            <h3 className="mt-1 text-xl font-extrabold text-slate-900 sm:text-2xl">
+              বিদ্যালয়ের সারসংক্ষেপ
+            </h3>
 
-              <p className="mt-1 text-sm text-slate-500">
-                বর্তমান সিস্টেমের গুরুত্বপূর্ণ তথ্য
-              </p>
-            </div>
+            <p className="mt-1 text-sm text-slate-500">
+              বর্তমান সিস্টেমের গুরুত্বপূর্ণ তথ্য
+            </p>
           </div>
 
-          <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
+          {/* 5 STAT CARDS */}
+
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-5">
             {statCards.map((item) => (
               <StatCard
                 key={item.label}
                 {...item}
-                value={toBanglaNumber(item.value)}
+                value={toBanglaNumber(
+                  item.value
+                )}
               />
             ))}
           </div>
         </section>
 
         {/* ==========================================
-            MANAGEMENT SECTION
+            MANAGEMENT
         ========================================== */}
 
         <section className="mt-8">
@@ -470,17 +558,20 @@ function AdminDashboard() {
             </h3>
 
             <p className="mt-1 text-sm text-slate-500">
-              যেই বিভাগ পরিচালনা করতে চান সেটি নির্বাচন করুন।
+              যেই বিভাগ পরিচালনা করতে চান
+              সেটি নির্বাচন করুন।
             </p>
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {managementCards.map((item) => (
-              <ManagementCard
-                key={item.title}
-                {...item}
-              />
-            ))}
+            {managementCards.map(
+              (item) => (
+                <ManagementCard
+                  key={item.title}
+                  {...item}
+                />
+              )
+            )}
           </div>
         </section>
 
@@ -516,55 +607,109 @@ function StatCard({
     blue: {
       icon:
         "border-blue-100 bg-blue-50 text-blue-700",
-      number: "text-blue-700",
-      line: "from-blue-500 to-cyan-500",
+
+      number:
+        "text-blue-700",
+
+      line:
+        "from-blue-500 to-cyan-500",
+
       badge:
-        "bg-blue-50 text-blue-600 border-blue-100",
-      hover: "hover:border-blue-300",
+        "border-blue-100 bg-blue-50 text-blue-600",
+
+      hover:
+        "hover:border-blue-300",
     },
 
     emerald: {
       icon:
         "border-emerald-100 bg-emerald-50 text-emerald-700",
-      number: "text-emerald-700",
-      line: "from-emerald-500 to-teal-500",
+
+      number:
+        "text-emerald-700",
+
+      line:
+        "from-emerald-500 to-teal-500",
+
       badge:
-        "bg-emerald-50 text-emerald-600 border-emerald-100",
-      hover: "hover:border-emerald-300",
+        "border-emerald-100 bg-emerald-50 text-emerald-600",
+
+      hover:
+        "hover:border-emerald-300",
     },
 
     violet: {
       icon:
         "border-violet-100 bg-violet-50 text-violet-700",
-      number: "text-violet-700",
-      line: "from-violet-500 to-fuchsia-500",
+
+      number:
+        "text-violet-700",
+
+      line:
+        "from-violet-500 to-fuchsia-500",
+
       badge:
-        "bg-violet-50 text-violet-600 border-violet-100",
-      hover: "hover:border-violet-300",
+        "border-violet-100 bg-violet-50 text-violet-600",
+
+      hover:
+        "hover:border-violet-300",
     },
 
     orange: {
       icon:
         "border-orange-100 bg-orange-50 text-orange-700",
-      number: "text-orange-700",
-      line: "from-orange-500 to-amber-500",
+
+      number:
+        "text-orange-700",
+
+      line:
+        "from-orange-500 to-amber-500",
+
       badge:
-        "bg-orange-50 text-orange-600 border-orange-100",
-      hover: "hover:border-orange-300",
+        "border-orange-100 bg-orange-50 text-orange-600",
+
+      hover:
+        "hover:border-orange-300",
+    },
+
+    // ======================================
+    // NOTICE CARD COLOR
+    // ======================================
+
+    teal: {
+      icon:
+        "border-teal-100 bg-teal-50 text-teal-700",
+
+      number:
+        "text-teal-700",
+
+      line:
+        "from-teal-600 to-cyan-600",
+
+      badge:
+        "border-teal-100 bg-teal-50 text-teal-700",
+
+      hover:
+        "hover:border-teal-300",
     },
   };
 
-  const current = styles[accent];
+  const current =
+    styles[accent];
 
   return (
     <article
       className={`group relative overflow-hidden rounded-[24px] border border-slate-300/80 bg-white/95 p-4 shadow-[0_10px_30px_rgba(15,23,42,0.08)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_18px_42px_rgba(15,23,42,0.14)] sm:p-5 ${current.hover}`}
     >
+      {/* Top Accent */}
+
       <div
         className={`absolute inset-x-0 top-0 h-1 bg-gradient-to-r ${current.line}`}
       />
 
       <div className="flex items-start justify-between gap-3">
+        {/* Icon */}
+
         <div
           className={`flex h-11 w-11 items-center justify-center rounded-2xl border ${current.icon}`}
         >
@@ -574,12 +719,16 @@ function StatCard({
           />
         </div>
 
+        {/* Total */}
+
         <span
           className={`rounded-full border px-2.5 py-1 text-[9px] font-extrabold uppercase tracking-[0.12em] ${current.badge}`}
         >
           Total
         </span>
       </div>
+
+      {/* Value */}
 
       <div className="mt-4">
         <p className="text-xs font-bold text-slate-500 sm:text-sm">
@@ -612,9 +761,13 @@ function ManagementCard({
     blue: {
       icon:
         "border-blue-100 bg-blue-50 text-blue-700",
+
       button:
         "from-blue-600 to-cyan-600 shadow-blue-200/80",
-      border: "hover:border-blue-300",
+
+      border:
+        "hover:border-blue-300",
+
       small:
         "border-blue-100 bg-blue-50 text-blue-600",
     },
@@ -622,9 +775,13 @@ function ManagementCard({
     emerald: {
       icon:
         "border-emerald-100 bg-emerald-50 text-emerald-700",
+
       button:
         "from-emerald-600 to-teal-600 shadow-emerald-200/80",
-      border: "hover:border-emerald-300",
+
+      border:
+        "hover:border-emerald-300",
+
       small:
         "border-emerald-100 bg-emerald-50 text-emerald-600",
     },
@@ -632,9 +789,13 @@ function ManagementCard({
     violet: {
       icon:
         "border-violet-100 bg-violet-50 text-violet-700",
+
       button:
         "from-violet-600 to-fuchsia-600 shadow-violet-200/80",
-      border: "hover:border-violet-300",
+
+      border:
+        "hover:border-violet-300",
+
       small:
         "border-violet-100 bg-violet-50 text-violet-600",
     },
@@ -642,9 +803,13 @@ function ManagementCard({
     orange: {
       icon:
         "border-orange-100 bg-orange-50 text-orange-700",
+
       button:
         "from-orange-500 to-amber-500 shadow-orange-200/80",
-      border: "hover:border-orange-300",
+
+      border:
+        "hover:border-orange-300",
+
       small:
         "border-orange-100 bg-orange-50 text-orange-600",
     },
@@ -652,21 +817,30 @@ function ManagementCard({
     teal: {
       icon:
         "border-teal-100 bg-teal-50 text-teal-700",
+
       button:
         "from-cyan-600 to-teal-600 shadow-teal-200/80",
-      border: "hover:border-teal-300",
+
+      border:
+        "hover:border-teal-300",
+
       small:
         "border-teal-100 bg-teal-50 text-teal-600",
     },
   };
 
-  const current = styles[accent];
+  const current =
+    styles[accent];
 
   return (
     <article
       className={`group relative flex h-full flex-col overflow-hidden rounded-[26px] border border-slate-300/80 bg-white/95 p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_20px_45px_rgba(15,23,42,0.14)] sm:p-6 ${current.border}`}
     >
+      {/* Corner Background */}
+
       <div className="absolute right-0 top-0 h-24 w-24 rounded-bl-[80px] bg-slate-50/80" />
+
+      {/* Icon / Badge */}
 
       <div className="relative flex items-start justify-between">
         <div
@@ -684,6 +858,8 @@ function ManagementCard({
           Manage
         </span>
       </div>
+
+      {/* Content */}
 
       <div className="relative mt-5 flex flex-1 flex-col">
         <h4 className="text-lg font-extrabold text-slate-900 sm:text-xl">
@@ -711,7 +887,9 @@ function ManagementCard({
 // SCHOOL ICON
 // ==========================================
 
-function SchoolIcon({ className = "" }) {
+function SchoolIcon({
+  className = "",
+}) {
   return (
     <svg
       viewBox="0 0 24 24"
@@ -746,7 +924,9 @@ function SchoolIcon({ className = "" }) {
 // LOGOUT ICON
 // ==========================================
 
-function LogoutIcon({ className = "" }) {
+function LogoutIcon({
+  className = "",
+}) {
   return (
     <svg
       viewBox="0 0 24 24"
@@ -775,7 +955,9 @@ function LogoutIcon({ className = "" }) {
 // SHIELD ICON
 // ==========================================
 
-function ShieldIcon({ className = "" }) {
+function ShieldIcon({
+  className = "",
+}) {
   return (
     <svg
       viewBox="0 0 24 24"
@@ -804,7 +986,9 @@ function ShieldIcon({ className = "" }) {
 // ARROW ICON
 // ==========================================
 
-function ArrowIcon({ className = "" }) {
+function ArrowIcon({
+  className = "",
+}) {
   return (
     <svg
       viewBox="0 0 24 24"
@@ -830,7 +1014,10 @@ function DashboardIcon({
   name,
   className = "",
 }) {
-  // Teacher
+  // ======================================
+  // TEACHER
+  // ======================================
+
   if (name === "teacher") {
     return (
       <svg
@@ -863,7 +1050,10 @@ function DashboardIcon({
     );
   }
 
-  // Student
+  // ======================================
+  // STUDENT
+  // ======================================
+
   if (name === "student") {
     return (
       <svg
@@ -888,7 +1078,10 @@ function DashboardIcon({
     );
   }
 
-  // Result
+  // ======================================
+  // RESULT
+  // ======================================
+
   if (name === "result") {
     return (
       <svg
@@ -913,7 +1106,10 @@ function DashboardIcon({
     );
   }
 
-  // Routine
+  // ======================================
+  // ROUTINE
+  // ======================================
+
   if (name === "routine") {
     return (
       <svg
@@ -941,7 +1137,10 @@ function DashboardIcon({
     );
   }
 
-  // Notice
+  // ======================================
+  // NOTICE
+  // ======================================
+
   if (name === "notice") {
     return (
       <svg
