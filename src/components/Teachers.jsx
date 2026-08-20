@@ -22,7 +22,7 @@ export default function Teachers() {
         setError("");
 
         const response = await fetch(
-          "http://127.0.0.1:8000/api/teachers"
+          "https://gamma-school-web-backend-production.up.railway.app/api/teachers"
         );
 
         if (!response.ok) {

@@ -1,4 +1,5 @@
-const API_URL = "http://127.0.0.1:8000/api";
+const API_URL =
+  "https://gamma-school-web-backend-production.up.railway.app/api";
 
 export async function apiRequest(endpoint, options = {}) {
   const isFormData =
