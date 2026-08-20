@@ -14,8 +14,9 @@ export const Route = createFileRoute("/admin/login")({
 function AdminLogin() {
   const navigate = useNavigate();
 
-  const [email, setEmail] = useState("admin@gmail.com");
-  const [password, setPassword] = useState("password");
+  // Login field থাকবে blank
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e) => {
@@ -106,8 +107,9 @@ function AdminLogin() {
               onChange={(e) =>
                 setEmail(e.target.value)
               }
-              placeholder="admin@gmail.com"
+              placeholder="আপনার ই-মেইল লিখুন"
               required
+              autoComplete="email"
               className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
             />
           </div>
@@ -123,8 +125,9 @@ function AdminLogin() {
               onChange={(e) =>
                 setPassword(e.target.value)
               }
-              placeholder="Password"
+              placeholder="আপনার পাসওয়ার্ড লিখুন"
               required
+              autoComplete="current-password"
               className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
             />
           </div>
